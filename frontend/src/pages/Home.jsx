@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Box, Typography, Button, Container, Card, CardContent, useTheme } from '@mui/material';
+import { Box, Typography, Button, Container, Card, CardContent } from '@mui/material';
+import { useTheme, styled, alpha } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { styled } from '@mui/material/styles';
-import { 
+import {
   UploadCloud,
   BrainCircuit,
   Lightbulb,
@@ -15,17 +15,26 @@ import {
 } from 'lucide-react';
 import heroImage from '../assets/hero-image.jpg';
 
+const MotionButton = motion(Button);
+const MotionBox = motion(Box);
+
 // Styled Components
 const HeroSection = styled(Box)(({ theme }) => ({
   position: 'relative',
   height: '100vh',
-  minHeight: '600px',
+  minHeight: '700px',
+  paddingTop: theme.spacing(12),
+  paddingBottom: theme.spacing(8),
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   textAlign: 'center',
-  color: theme.palette.common.white,
+  color: '#ffffff',
   overflow: 'hidden',
+  background: `linear-gradient(rgba(2, 6, 23, 0.3) 0%, rgba(2, 6, 23, 0.7) 100%), url(${heroImage})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundAttachment: 'fixed',
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -33,29 +42,8 @@ const HeroSection = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: `
-      linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.7) 0%,
-        rgba(0, 0, 0, 0.5) 50%,
-        rgba(0, 0, 0, 0.3) 100%
-      ),
-      url(${heroImage})
-    `,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center center',
-    backgroundAttachment: 'fixed',
-    zIndex: -1,
-    filter: 'brightness(0.8) contrast(1.1) saturate(1.2)',
-    animation: 'pan-image 15s linear infinite alternate',
-  },
-  '@keyframes pan-image': {
-    '0%': {
-      backgroundPosition: '15% center',
-    },
-    '100%': {
-      backgroundPosition: '85% center',
-    },
+    background: 'radial-gradient(circle at center, transparent 0%, rgba(2, 6, 23, 0.4) 100%)',
+    zIndex: 1,
   },
 }));
 
@@ -129,57 +117,59 @@ const Home = () => {
             transition={{ duration: 0.8 }}
           >
             <Box sx={{ mb: 3 }}>
-              <LawBadge component={motion.div} whileHover={{ scale: 1.05 }}>
-                <BookOpen size={18} />
-                <Typography variant="body2" fontWeight="600">FEDERAL</Typography>
-              </LawBadge>
-              <LawBadge component={motion.div} whileHover={{ scale: 1.05 }}>
-                <Gavel size={18} />
-                <Typography variant="body2" fontWeight="600">STATE</Typography>
-              </LawBadge>
-              <LawBadge component={motion.div} whileHover={{ scale: 1.05 }}>
-                <Scale size={18} />
-                <Typography variant="body2" fontWeight="600">LOCAL</Typography>
-              </LawBadge>
+              <MotionBox whileHover={{ scale: 1.05 }} sx={{ display: 'inline-block' }}>
+                <LawBadge>
+                  <BookOpen size={18} />
+                  <Typography variant="body2" fontWeight="600">FEDERAL</Typography>
+                </LawBadge>
+              </MotionBox>
+              <MotionBox whileHover={{ scale: 1.05 }} sx={{ display: 'inline-block' }}>
+                <LawBadge>
+                  <Gavel size={18} />
+                  <Typography variant="body2" fontWeight="600">STATE</Typography>
+                </LawBadge>
+              </MotionBox>
+              <MotionBox whileHover={{ scale: 1.05 }} sx={{ display: 'inline-block' }}>
+                <LawBadge>
+                  <Scale size={18} />
+                  <Typography variant="body2" fontWeight="600">LOCAL</Typography>
+                </LawBadge>
+              </MotionBox>
             </Box>
-            
-            <Typography 
-              variant="h2" 
-              component="h1" 
-              gutterBottom
-              sx={{ 
-                fontWeight: 800,
-                textShadow: '0 4px 8px rgba(0,0,0,0.5)',
-                fontSize: { xs: '2.5rem', md: '3.75rem' },
-                lineHeight: 1.2,
-                letterSpacing: '-0.5px',
-                mb: 3
+
+            <Typography
+              variant="h1"
+              sx={{
+                fontWeight: 900,
+                textShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                fontSize: { xs: '3rem', md: '4.5rem' },
+                lineHeight: 1.1,
+                mb: 3,
+                background: 'linear-gradient(to right, #ffffff 0%, #cbd5e1 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
               }}
             >
-              AI-Powered Legal Document Analysis
+              Master Your Legal <br /> Documentation
             </Typography>
-            <Typography 
-              variant="h5" 
-              paragraph
-              sx={{ 
-                mb: 4,
+            <Typography
+              variant="h5"
+              sx={{
+                mb: 6,
                 textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                fontSize: { xs: '1.25rem', md: '1.5rem' },
-                maxWidth: '800px',
+                fontSize: { xs: '1.2rem', md: '1.5rem' },
+                maxWidth: '700px',
                 margin: '0 auto',
                 fontWeight: 400,
-                opacity: 0.9
+                color: 'rgba(255, 255, 255, 0.8)',
+                lineHeight: 1.6
               }}
             >
-              Upload, summarize, and debate legal documents with our intelligent assistant
+              Upload, analyze, and gain deep insights from legal documents with our intelligent RAG-powered assistant.
             </Typography>
-            <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center' }}>
-              <Button
-                component={motion.div}
-                whileHover={{ 
-                  scale: 1.05, 
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
-                }}
+            <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', position: 'relative', zIndex: 10 }}>
+              <MotionButton
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 variant="contained"
                 color="primary"
@@ -188,41 +178,35 @@ const Home = () => {
                 to="/register"
                 endIcon={<ArrowRight size={22} />}
                 sx={{
-                  px: 5,
-                  py: 1.8,
-                  borderRadius: '14px',
-                  fontWeight: 700,
+                  px: 6,
+                  py: 2,
                   fontSize: '1.1rem',
-                  textTransform: 'none'
                 }}
               >
                 Get Started
-              </Button>
-              <Button
-                component={motion.div}
+              </MotionButton>
+              <MotionButton
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 variant="outlined"
-                color="inherit"
+                color="primary"
                 size="large"
                 component={Link}
-                to="/demo"
+                to="/try-it"
                 sx={{
-                  px: 5,
-                  py: 1.8,
-                  borderRadius: '14px',
-                  fontWeight: 700,
+                  px: 6,
+                  py: 2,
                   fontSize: '1.1rem',
-                  borderWidth: '2px',
-                  textTransform: 'none',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  color: 'white',
                   '&:hover': {
-                    borderWidth: '2px',
+                    borderColor: 'white',
                     backgroundColor: 'rgba(255,255,255,0.1)'
                   }
                 }}
               >
-                Live Demo
-              </Button>
+                Try It Now
+              </MotionButton>
             </Box>
           </motion.div>
         </Container>
@@ -237,34 +221,32 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Typography 
-              variant="h3" 
-              component="h2" 
-              gutterBottom
-              sx={{ 
+            <Typography
+              variant="h2"
+              sx={{
                 fontWeight: 800,
-                fontSize: { xs: '2rem', md: '2.5rem' },
-                letterSpacing: '-0.5px'
+                fontSize: { xs: '2.5rem', md: '3.5rem' },
+                mb: 2,
               }}
             >
               How It Works
             </Typography>
-            <Typography 
-              variant="subtitle1" 
-              color="text.secondary"
-              sx={{ 
-                maxWidth: '700px', 
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: '600px',
                 margin: '0 auto',
-                fontSize: '1.1rem'
+                color: 'rgba(255,255,255,0.6)',
+                fontWeight: 400
               }}
             >
-              Three simple steps to transform your legal document review process
+              Three simple steps to transform your legal document review process with LegalAI.
             </Typography>
           </motion.div>
         </Box>
-        
-        <Box 
-          sx={{ 
+
+        <Box
+          sx={{
             display: 'grid',
             gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
             gap: 6,
@@ -324,7 +306,7 @@ const Home = () => {
                         />
                       )}
                     </AnimatePresence>
-                    <Box sx={{ 
+                    <Box sx={{
                       display: 'flex',
                       color: feature.color,
                       zIndex: 1,
@@ -333,23 +315,22 @@ const Home = () => {
                       {feature.icon}
                     </Box>
                   </Box>
-                  <Typography 
-                    variant="h5" 
-                    component="h3" 
-                    gutterBottom
-                    sx={{ 
-                      fontWeight: 700, 
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
                       mb: 2,
-                      textAlign: 'center'
+                      textAlign: 'center',
+                      color: 'white'
                     }}
                   >
                     {feature.title}
                   </Typography>
-                  <Typography 
-                    color="text.secondary"
-                    sx={{ 
+                  <Typography
+                    sx={{
                       textAlign: 'center',
-                      fontSize: '1.05rem'
+                      color: 'rgba(255,255,255,0.6)',
+                      lineHeight: 1.6
                     }}
                   >
                     {feature.description}
@@ -362,22 +343,16 @@ const Home = () => {
       </Container>
 
       {/* CTA Section */}
-      <Box sx={{ 
-        backgroundColor: theme.palette.primary.dark,
-        color: theme.palette.primary.contrastText,
-        py: 12,
+      <Box sx={{
+        background: 'linear-gradient(rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.8)), url(' + heroImage + ')',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        color: 'white',
+        py: 15,
         textAlign: 'center',
         position: 'relative',
-        overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: `linear-gradient(90deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
-        }
+        borderTop: `1px solid ${alpha('#ffffff', 0.1)}`,
       }}>
         <Container maxWidth="md">
           <motion.div
@@ -386,32 +361,30 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Typography 
-              variant="h3" 
-              component="h2" 
-              gutterBottom
-              sx={{ 
+            <Typography
+              variant="h2"
+              sx={{
                 fontWeight: 800,
                 mb: 3,
-                fontSize: { xs: '2rem', md: '2.5rem' },
-                letterSpacing: '-0.5px'
+                fontSize: { xs: '2.5rem', md: '3.5rem' },
               }}
             >
-              Ready to Transform Your Legal Workflow?
+              Ready to Transform Your Workflow?
             </Typography>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                mb: 4, 
-                opacity: 0.9,
-                fontSize: '1.25rem'
+            <Typography
+              variant="h6"
+              sx={{
+                mb: 6,
+                color: 'rgba(255,255,255,0.8)',
+                maxWidth: '600px',
+                margin: '0 auto',
+                fontWeight: 400
               }}
             >
-              Join thousands of legal professionals who save hours every week with LegalAI
+              Join thousands of legal professionals who save hours every week.
             </Typography>
-            <Button
-              component={motion.div}
-              whileHover={{ 
+            <MotionButton
+              whileHover={{
                 scale: 1.05,
                 boxShadow: `0 8px 24px ${theme.palette.primary.dark}`
               }}
@@ -420,7 +393,7 @@ const Home = () => {
               color="secondary"
               size="large"
               component={Link}
-              to="/pricing"
+              to="/try-it"
               endIcon={<Rocket size={22} />}
               sx={{
                 px: 6,
@@ -431,8 +404,8 @@ const Home = () => {
                 textTransform: 'none'
               }}
             >
-              Launch Your Legal AI
-            </Button>
+              Get Started
+            </MotionButton>
           </motion.div>
         </Container>
       </Box>

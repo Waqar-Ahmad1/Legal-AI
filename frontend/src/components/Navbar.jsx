@@ -2,16 +2,18 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Button, AppBar, Toolbar, Typography, Box, Container, IconButton, Menu, MenuItem, useMediaQuery, useTheme } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import logo from '../assets/logo.svg';
 
 // Styled components
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   position: 'fixed',
-  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-  color: theme.palette.text.primary,
+  backgroundColor: alpha('#020617', 0.8),
+  backdropFilter: 'blur(12px)',
+  borderBottom: `1px solid ${alpha('#ffffff', 0.1)}`,
+  color: '#ffffff',
+  boxShadow: 'none',
   zIndex: theme.zIndex.drawer + 1,
 }));
 
@@ -19,43 +21,43 @@ const LogoBox = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   gap: '12px',
+  textDecoration: 'none',
+  color: 'inherit',
   transition: 'all 0.3s ease',
   '&:hover': {
-    transform: 'scale(1.03)',
+    transform: 'scale(1.02)',
   },
 });
 
 const LogoImg = styled('img')({
-  height: '48px',
+  height: '40px',
   width: 'auto',
-  transition: 'all 0.3s ease',
-  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-  '&:hover': {
-    transform: 'scale(1.1)',
-    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2)) brightness(1.05)',
-  },
+  filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.3))',
 });
 
-const NavButton = styled(Button)({
-  margin: '0 8px',
+const NavButton = styled(Button)(({ theme }) => ({
+  margin: '0 4px',
   fontWeight: 600,
   textTransform: 'none',
-  fontSize: '1rem',
-  borderRadius: '8px',
-  padding: '8px 16px',
-  transition: 'all 0.3s ease',
+  fontSize: '0.95rem',
+  color: 'rgba(255, 255, 255, 0.8)',
   '&:hover': {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    transform: 'translateY(-2px)',
+    color: '#ffffff',
+    backgroundColor: alpha('#ffffff', 0.05),
   },
-});
+}));
 
-const PrimaryButton = styled(NavButton)({
-  backgroundColor: 'rgba(0, 120, 255, 0.1)',
+const ActionButton = styled(Button)(({ theme }) => ({
+  marginLeft: '12px',
+  fontWeight: 700,
+  textTransform: 'none',
+  borderRadius: '10px',
+  padding: '8px 20px',
+  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.25)',
   '&:hover': {
-    backgroundColor: 'rgba(0, 120, 255, 0.2)',
+    boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
   },
-});
+}));
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -84,12 +86,12 @@ const Navbar = () => {
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           {/* Logo with enhanced hover effects */}
-          <LogoBox 
-            component={Link} 
-            to="/" 
-            sx={{ 
-              flexGrow: 1, 
-              textDecoration: 'none', 
+          <LogoBox
+            component={Link}
+            to="/"
+            sx={{
+              flexGrow: 1,
+              textDecoration: 'none',
               color: 'inherit',
               '&:hover': {
                 '& img': {
@@ -102,7 +104,7 @@ const Navbar = () => {
             }}
           >
             <LogoImg src={logo} alt="LegalAI Logo" />
-            <Typography variant="h6" noWrap sx={{ 
+            <Typography variant="h6" noWrap sx={{
               fontWeight: 700,
               transition: 'color 0.3s ease'
             }}>
@@ -113,63 +115,52 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           {!isMobile ? (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <NavButton color="inherit" component={Link} to="/">
-                Home
-              </NavButton>
-              
-              <NavButton color="inherit" component={Link} to="/about">
-                About
-              </NavButton>
-              
+              <NavButton component={Link} to="/">Home</NavButton>
+              <NavButton component={Link} to="/about">About</NavButton>
+
               {user ? (
                 <>
-                  <PrimaryButton color="inherit" component={Link} to="/dashboard">
-                    Dashboard
-                  </PrimaryButton>
-                  <NavButton color="inherit" component={Link} to="/upload">
+                  {user.role === 'admin' && (
+                    <NavButton component={Link} to="/admin">Admin</NavButton>
+                  )}
+                  <NavButton component={Link} to="/upload">
                     Upload
                   </NavButton>
-                  {user.role === 'admin' && (
-                    <NavButton color="inherit" component={Link} to="/admin">
-                      Admin
-                    </NavButton>
-                  )}
-                  <NavButton 
-                    color="inherit" 
+                  <ActionButton
+                    variant="contained"
+                    color="primary"
+                    component={Link}
+                    to="/dashboard"
+                  >
+                    Dashboard
+                  </ActionButton>
+                  <ActionButton
+                    variant="outlined"
                     onClick={handleLogout}
-                    sx={{ 
-                      backgroundColor: 'rgba(255, 50, 50, 0.1)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 50, 50, 0.2)',
-                      }
-                    }}
+                    sx={{ color: '#ef4444', borderColor: alpha('#ef4444', 0.3), '&:hover': { borderColor: '#ef4444', backgroundColor: alpha('#ef4444', 0.05) } }}
                   >
                     Logout
-                  </NavButton>
+                  </ActionButton>
                 </>
               ) : (
                 <>
-                  <PrimaryButton 
-                    color="inherit" 
-                    component={Link} 
+                  <ActionButton
+                    variant="contained"
+                    color="primary"
+                    component={Link}
                     to="/try-it"
-                    sx={{
-                      backgroundColor: 'rgba(0, 200, 100, 0.1)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(0, 200, 100, 0.2)',
-                      }
-                    }}
                   >
                     Try It Now
-                  </PrimaryButton>
-                  
-                  <NavButton color="inherit" component={Link} to="/register">
-                    Register
-                  </NavButton>
-                  
-                  <PrimaryButton color="inherit" component={Link} to="/login">
+                  </ActionButton>
+                  <NavButton component={Link} to="/register">Register</NavButton>
+                  <ActionButton
+                    variant="outlined"
+                    color="primary"
+                    component={Link}
+                    to="/login"
+                  >
                     Login
-                  </PrimaryButton>
+                  </ActionButton>
                 </>
               )}
             </Box>
@@ -213,7 +204,7 @@ const Navbar = () => {
               >
                 <MenuItem component={Link} to="/" onClick={handleMenuClose}>Home</MenuItem>
                 <MenuItem component={Link} to="/about" onClick={handleMenuClose}>About</MenuItem>
-                
+
                 {user ? (
                   <>
                     <MenuItem component={Link} to="/dashboard" onClick={handleMenuClose}>
@@ -227,9 +218,9 @@ const Navbar = () => {
                         Admin
                       </MenuItem>
                     )}
-                    <MenuItem 
+                    <MenuItem
                       onClick={handleLogout}
-                      sx={{ 
+                      sx={{
                         color: 'error.main',
                         backgroundColor: 'rgba(255, 50, 50, 0.05)',
                         '&:hover': {
@@ -242,9 +233,9 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <MenuItem 
-                      component={Link} 
-                      to="/try-it" 
+                    <MenuItem
+                      component={Link}
+                      to="/try-it"
                       onClick={handleMenuClose}
                       sx={{ color: 'success.main' }}
                     >
@@ -253,9 +244,9 @@ const Navbar = () => {
                     <MenuItem component={Link} to="/register" onClick={handleMenuClose}>
                       Register
                     </MenuItem>
-                    <MenuItem 
-                      component={Link} 
-                      to="/login" 
+                    <MenuItem
+                      component={Link}
+                      to="/login"
                       onClick={handleMenuClose}
                       sx={{ color: 'primary.main' }}
                     >

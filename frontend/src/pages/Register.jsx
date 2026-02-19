@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { authAPI } from '../services/api';
 import {
   Box,
   Typography,
@@ -13,13 +13,112 @@ import {
   Checkbox,
   IconButton,
   InputAdornment,
-  CssBaseline
+  CssBaseline,
+  CircularProgress,
+  Container,
+  Divider
 } from '@mui/material';
+import { useTheme, styled, alpha } from '@mui/material/styles';
 import {
   HowToRegOutlined as HowToRegOutlinedIcon,
   Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon
+  VisibilityOff as VisibilityOffIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
+import { motion } from 'framer-motion';
+
+const PageWrapper = styled(Box)(({ theme }) => ({
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  background: '#020617',
+  position: 'relative',
+  overflow: 'hidden',
+  padding: theme.spacing(4, 0),
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    width: '1000px',
+    height: '1000px',
+    top: '-500px',
+    right: '-500px',
+    background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    width: '800px',
+    height: '800px',
+    bottom: '-400px',
+    left: '-400px',
+    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  }
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(5),
+  borderRadius: '24px',
+  background: alpha('#0f172a', 0.8),
+  backdropFilter: 'blur(20px)',
+  border: `1px solid ${alpha('#ffffff', 0.1)}`,
+  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+  width: '100%',
+  maxWidth: '500px',
+  position: 'relative',
+  zIndex: 1,
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: alpha('#ffffff', 0.03),
+    borderRadius: '12px',
+    transition: 'all 0.2s ease',
+    '& fieldset': {
+      borderColor: alpha('#ffffff', 0.1),
+    },
+    '&:hover fieldset': {
+      borderColor: alpha('#3b82f6', 0.5),
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#3b82f6',
+      borderWidth: '1.5px',
+    },
+  },
+  '& .MuiInputLabel-root': {
+    color: 'rgba(255, 255, 255, 0.5)',
+    '&.Mui-focused': {
+      color: '#3b82f6',
+    },
+  },
+  '& .MuiInputBase-input': {
+    color: '#ffffff',
+  },
+}));
+
+const GradientButton = styled(Button)(({ theme }) => ({
+  padding: '12px',
+  borderRadius: '12px',
+  fontWeight: 700,
+  fontSize: '1rem',
+  textTransform: 'none',
+  marginTop: theme.spacing(2),
+  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+  boxShadow: '0 10px 20px -5px rgba(59, 130, 246, 0.4)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 15px 25px -5px rgba(59, 130, 246, 0.5)',
+    background: 'linear-gradient(135deg, #4f46e5 0%, #a855f7 100%)',
+  },
+  '&:disabled': {
+    background: alpha('#ffffff', 0.1),
+    color: alpha('#ffffff', 0.3),
+  }
+}));
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -36,441 +135,138 @@ const Register = () => {
   const [serverMessage, setServerMessage] = useState('');
   const navigate = useNavigate();
 
-  // Email validation function
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // Validation function
   const validateForm = () => {
     const newErrors = {};
-
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = 'Full name is required';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters long';
-    }
-
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
-    }
-
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
+    if (!formData.name.trim()) newErrors.name = 'Full name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!isValidEmail(formData.email)) newErrors.email = 'Please enter a valid email address';
+    if (!formData.password) newErrors.password = 'Password is required';
+    else if (formData.password.length < 6) newErrors.password = 'Minimum 6 characters';
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-
-    // Clear server message when user makes changes
-    if (serverMessage) {
-      setServerMessage('');
-    }
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+    if (serverMessage) setServerMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setServerMessage('');
-    
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     setLoading(true);
-
     try {
-      // Prepare payload according to backend expectations
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password
       };
-
-      console.log('Sending registration request:', payload);
-
-      const response = await axios.post("http://localhost:8000/register", payload, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000 // 10 second timeout
-      });
-
-      console.log('Registration response:', response.data);
-
-      if (response.data.success) {
-        setServerMessage({
-          type: 'success',
-          text: 'Registration successful! Redirecting to login...'
-        });
-        
-        // Redirect to login page after successful registration
-        setTimeout(() => {
-          navigate('/login', { 
-            state: { 
-              message: 'Registration successful! Please login to continue.',
-              email: formData.email 
-            }
-          });
-        }, 2000);
+      const data = await authAPI.register(payload);
+      if (data.success) {
+        setServerMessage({ type: 'success', text: 'Registration successful! Redirecting...' });
+        setTimeout(() => navigate('/login', { state: { email: formData.email } }), 2000);
       } else {
-        setServerMessage({
-          type: 'error',
-          text: response.data.message || 'Registration failed. Please try again.'
-        });
+        setServerMessage({ type: 'error', text: data.message || 'Registration failed.' });
       }
-
     } catch (error) {
-      console.error('Registration error:', error);
-      
-      let errorMessage = 'Registration failed. Please try again.';
-      
-      if (error.response) {
-        // Server responded with error status
-        const serverError = error.response.data;
-        console.log('Server error response:', serverError);
-        
-        if (serverError.detail) {
-          errorMessage = serverError.detail;
-        } else if (serverError.message) {
-          errorMessage = serverError.message;
-        } else if (typeof serverError === 'string') {
-          errorMessage = serverError;
-        } else if (Array.isArray(serverError) && serverError.length > 0) {
-          // Handle array of errors
-          errorMessage = serverError.map(err => err.msg || err.message).join(', ');
-        }
-      } else if (error.request) {
-        // Request was made but no response received
-        errorMessage = 'Unable to connect to server. Please check your connection.';
-      } else {
-        // Something else happened
-        errorMessage = error.message || 'An unexpected error occurred.';
-      }
-
-      setServerMessage({
-        type: 'error',
-        text: errorMessage
-      });
+      setServerMessage({ type: 'error', text: error.data?.detail || error.message || 'Registration failed.' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
-
-  // Helper function to display server messages
-  const renderServerMessage = () => {
-    if (!serverMessage) return null;
-
-    return (
-      <Alert 
-        severity={serverMessage.type} 
-        sx={{ 
-          mb: 3,
-          borderRadius: 2,
-          boxShadow: 1
-        }}
-      >
-        {serverMessage.text}
-      </Alert>
-    );
-  };
-
   return (
-    <>
+    <PageWrapper>
       <CssBaseline />
-      <Box sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-        overflow: 'hidden',
-        '&::-webkit-scrollbar': {
-          display: 'none'
-        },
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none'
-      }}>
-        <Grid container justifyContent="center" sx={{ overflow: 'hidden' }}>
-          <Grid item xs={12} sm={8} md={6} lg={4} sx={{ overflow: 'hidden' }}>
-            <Paper elevation={6} sx={{
-              p: 4,
-              borderRadius: 4,
-              boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)',
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              transform: 'translateY(0)',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-5px)',
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)'
-              },
-              overflow: 'hidden'
-            }}>
-              <Box textAlign="center" mb={3}>
-                <HowToRegOutlinedIcon color="primary" sx={{ 
-                  fontSize: 50,
-                  background: 'linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }} />
-                <Typography variant="h4" component="h1" gutterBottom sx={{ 
-                  fontWeight: 700,
-                  color: 'text.primary',
-                  mt: 1
-                }}>
-                  Create Account
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Join LegalAI today and streamline your legal practice
-                </Typography>
-              </Box>
-
-              {renderServerMessage()}
-
-              <Box 
-                component="form" 
-                onSubmit={handleSubmit}
-                sx={{ mt: 2 }}
-                noValidate
+      <Container maxWidth="sm" sx={{ display: 'flex', justifyContent: 'center', zIndex: 1 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <StyledPaper elevation={0}>
+            <Box sx={{ mb: 4, textAlign: 'center' }}>
+              <IconButton
+                component={Link}
+                to="/"
+                sx={{
+                  position: 'absolute',
+                  top: 24,
+                  left: 24,
+                  color: 'rgba(255,255,255,0.4)',
+                  '&:hover': { color: 'white', background: 'rgba(255,255,255,0.05)' }
+                }}
               >
-                <TextField
-                  label="Full Name"
-                  name="name"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  value={formData.name}
-                  onChange={handleChange}
-                  error={!!errors.name}
-                  helperText={errors.name}
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '& fieldset': {
-                        borderColor: 'rgba(0, 0, 0, 0.1)'
-                      },
-                      '&:hover fieldset': {
-                        borderColor: 'primary.main'
-                      }
-                    }
-                  }}
-                />
-                
-                <TextField
-                  label="Email Address"
-                  name="email"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={!!errors.email}
-                  helperText={errors.email}
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
-                  placeholder="example@domain.com"
-                />
-                
-                <TextField
-                  label="Password"
-                  name="password"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={!!errors.password}
-                  helperText={errors.password || 'Minimum 6 characters'}
-                  required
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={handleClickShowPassword}
-                          edge="end"
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
-                />
-                
-                <TextField
-                  label="Confirm Password"
-                  name="confirmPassword"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  error={!!errors.confirmPassword}
-                  helperText={errors.confirmPassword}
-                  required
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle confirm password visibility"
-                          onClick={handleClickShowConfirmPassword}
-                          edge="end"
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
-                />
-                
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="isAttorney"
-                      checked={formData.isAttorney}
-                      onChange={handleChange}
-                      color="primary"
-                    />
-                  }
-                  label="I am a legal professional"
-                  sx={{ mt: 1, color: 'text.secondary' }}
-                />
-                
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  disabled={loading}
-                  sx={{
-                    mt: 3,
-                    mb: 2,
-                    py: 1.5,
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    letterSpacing: 0.5,
-                    background: 'linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)',
-                    boxShadow: '0 3px 5px 2px rgba(33, 150, 243, 0.1)',
-                    '&:hover': {
-                      boxShadow: '0 5px 10px 2px rgba(33, 150, 243, 0.2)'
-                    },
-                    '&:disabled': {
-                      background: 'grey.300'
-                    }
-                  }}
-                >
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                </Button>
-              </Box>
+                <ArrowBackIcon />
+              </IconButton>
 
-              <Box textAlign="center" sx={{ mt: 3 }}>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  Already have an account?{' '}
-                  <Link 
-                    to="/login" 
-                    style={{ 
-                      color: '#3f51b5',
-                      textDecoration: 'none',
-                      fontWeight: 600
-                    }}
-                    onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                    onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                  >
-                    Sign In
-                  </Link>
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
-                  By registering, you agree to our{' '}
-                  <Link 
-                    to="/terms" 
-                    style={{ 
-                      color: '#3f51b5',
-                      textDecoration: 'none',
-                      fontWeight: 600
-                    }}
-                    onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                    onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                  >
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link 
-                    to="/privacy" 
-                    style={{ 
-                      color: '#3f51b5',
-                      textDecoration: 'none',
-                      fontWeight: 600
-                    }}
-                    onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                    onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                  >
-                    Privacy Policy
-                  </Link>
-                </Typography>
+              <Box sx={{
+                display: 'inline-flex',
+                p: 1.5,
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))',
+                mb: 2,
+                border: '1px solid rgba(59, 130, 246, 0.2)'
+              }}>
+                <HowToRegOutlinedIcon sx={{ fontSize: 32, color: '#3b82f6' }} />
               </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
-    </>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', mb: 1, letterSpacing: '-0.5px' }}>
+                Create Account
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 400 }}>
+                Join the future of legal analysis
+              </Typography>
+            </Box>
+
+            {serverMessage && (
+              <Alert
+                severity={serverMessage.type}
+                sx={{ mb: 3, borderRadius: '12px', background: alpha(serverMessage.type === 'success' ? '#10b981' : '#ef4444', 0.1), color: serverMessage.type === 'success' ? '#10b981' : '#ef4444', border: `1px solid ${alpha(serverMessage.type === 'success' ? '#10b981' : '#ef4444', 0.2)}` }}
+              >
+                {serverMessage.text}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} noValidate>
+              <StyledTextField fullWidth label="Full Name" name="name" value={formData.name} onChange={handleChange} error={!!errors.name} helperText={errors.name} />
+              <StyledTextField fullWidth label="Email Address" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} />
+              <StyledTextField
+                fullWidth label="Password" name="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}
+                InputProps={{ endAdornment: (<InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.3)' }}>{showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton></InputAdornment>) }}
+              />
+              <StyledTextField
+                fullWidth label="Confirm Password" name="confirmPassword" type={showConfirmPassword ? "text" : "password"} value={formData.confirmPassword} onChange={handleChange} error={!!errors.confirmPassword} helperText={errors.confirmPassword}
+                InputProps={{ endAdornment: (<InputAdornment position="end"><IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.3)' }}>{showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton></InputAdornment>) }}
+              />
+
+              <FormControlLabel
+                control={<Checkbox name="isAttorney" checked={formData.isAttorney} onChange={handleChange} sx={{ color: 'rgba(255,255,255,0.2)', '&.Mui-checked': { color: '#3b82f6' } }} />}
+                label={<Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>I am a legal professional</Typography>}
+                sx={{ mb: 2 }}
+              />
+
+              <GradientButton type="submit" fullWidth disabled={loading}>
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
+              </GradientButton>
+            </Box>
+
+            <Box sx={{ textAlign: 'center', mt: 4 }}>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                Already have an account?{' '}
+                <Link to="/login" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 700 }}>
+                  Sign In
+                </Link>
+              </Typography>
+            </Box>
+          </StyledPaper>
+        </motion.div>
+      </Container>
+    </PageWrapper>
   );
 };
 

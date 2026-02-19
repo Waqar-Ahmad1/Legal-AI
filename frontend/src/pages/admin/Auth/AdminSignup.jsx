@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { authAPI } from '../../../services/api';
 import {
   Box,
   Typography,
@@ -21,8 +21,7 @@ import {
 } from '@mui/icons-material';
 
 // API configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-const ADMIN_SIGNUP_ENDPOINT = `${API_BASE_URL}/admin/signup`;
+// Removed hardcoded API_BASE_URL to use central service
 
 // Validation patterns
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -101,7 +100,7 @@ const AdminSignup = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -124,7 +123,7 @@ const AdminSignup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerMessage('');
-    
+
     // Validate form
     if (!validateForm()) {
       return;
@@ -143,62 +142,51 @@ const AdminSignup = () => {
 
       console.log('Sending admin registration request:', { ...payload, secret_key: '***' });
 
-      const response = await axios.post(ADMIN_SIGNUP_ENDPOINT, payload, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000 // 10 second timeout
-      });
+      const data = await authAPI.adminRegister(payload);
 
-      console.log('Admin registration response:', response.data);
+      console.log('Admin registration response:', data);
 
-      if (response.data.success) {
+      if (data.success) {
         setServerMessage({
           type: 'success',
           text: 'Admin account created successfully! Redirecting to login...'
         });
-        
+
         // Redirect to admin login page after successful registration
         setTimeout(() => {
-          navigate('/admin/signin', { 
-            state: { 
+          navigate('/admin/signin', {
+            state: {
               message: 'Admin account created successfully! Please login to continue.',
-              email: formData.email 
+              email: formData.email
             }
           });
         }, 2000);
       } else {
         setServerMessage({
           type: 'error',
-          text: response.data.message || 'Admin registration failed. Please try again.'
+          text: data.message || 'Admin registration failed. Please try again.'
         });
       }
 
     } catch (error) {
       console.error('Admin registration error:', error);
-      
+
       let errorMessage = 'Admin registration failed. Please try again.';
-      
-      if (error.response) {
-        // Server responded with error status
-        const serverError = error.response.data;
+
+      if (error.data) {
+        // Handle enhanced error from apiRequest
+        const serverError = error.data;
         console.log('Server error response:', serverError);
-        
+
         if (serverError.detail) {
           errorMessage = serverError.detail;
         } else if (serverError.message) {
           errorMessage = serverError.message;
         } else if (typeof serverError === 'string') {
           errorMessage = serverError;
-        } else if (serverError.success === false) {
-          errorMessage = serverError.message;
         }
-      } else if (error.request) {
-        // Request was made but no response received
-        errorMessage = 'Unable to connect to server. Please check your connection.';
-      } else {
-        // Something else happened
-        errorMessage = error.message || 'An unexpected error occurred.';
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
       setServerMessage({
@@ -219,9 +207,9 @@ const AdminSignup = () => {
     if (!serverMessage) return null;
 
     return (
-      <Alert 
-        severity={serverMessage.type} 
-        sx={{ 
+      <Alert
+        severity={serverMessage.type}
+        sx={{
           mb: 3,
           borderRadius: 2,
           boxShadow: 1
@@ -266,13 +254,13 @@ const AdminSignup = () => {
               overflow: 'hidden'
             }}>
               <Box textAlign="center" mb={3}>
-                <HowToRegOutlinedIcon color="primary" sx={{ 
+                <HowToRegOutlinedIcon color="primary" sx={{
                   fontSize: 50,
                   background: 'linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent'
                 }} />
-                <Typography variant="h4" component="h1" gutterBottom sx={{ 
+                <Typography variant="h4" component="h1" gutterBottom sx={{
                   fontWeight: 700,
                   color: 'text.primary',
                   mt: 1
@@ -286,8 +274,8 @@ const AdminSignup = () => {
 
               {renderServerMessage()}
 
-              <Box 
-                component="form" 
+              <Box
+                component="form"
                 onSubmit={handleSubmit}
                 sx={{ mt: 2 }}
                 noValidate
@@ -315,7 +303,7 @@ const AdminSignup = () => {
                     }
                   }}
                 />
-                
+
                 <TextField
                   label="Email Address"
                   name="email"
@@ -335,7 +323,7 @@ const AdminSignup = () => {
                   }}
                   placeholder="admin@legalai.com"
                 />
-                
+
                 <TextField
                   label="Password"
                   name="password"
@@ -368,7 +356,7 @@ const AdminSignup = () => {
                     }
                   }}
                 />
-                
+
                 <TextField
                   label="Confirm Password"
                   name="confirmPassword"
@@ -401,7 +389,7 @@ const AdminSignup = () => {
                     }
                   }}
                 />
-                
+
                 <TextField
                   label="Admin Secret Key"
                   name="secret_key"
@@ -439,7 +427,7 @@ const AdminSignup = () => {
                     }
                   }}
                 />
-                
+
                 <Button
                   type="submit"
                   fullWidth
@@ -471,9 +459,9 @@ const AdminSignup = () => {
               <Box textAlign="center" sx={{ mt: 3 }}>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   Already have an admin account?{' '}
-                  <Link 
-                    to="/admin/signin" 
-                    style={{ 
+                  <Link
+                    to="/admin/signin"
+                    style={{
                       color: '#3f51b5',
                       textDecoration: 'none',
                       fontWeight: 600

@@ -1,42 +1,40 @@
 import { useState, useEffect } from 'react';
 import { Container, Box, Typography, Link as MuiLink, IconButton, Divider } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
 import { LinkedIn, GitHub, Twitter, Email } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const StyledFooter = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.secondary,
-  padding: theme.spacing(6, 0),
+  backgroundColor: '#020617', // Match main background
+  color: 'rgba(255, 255, 255, 0.7)',
+  padding: theme.spacing(8, 0),
+  borderTop: `1px solid ${alpha('#ffffff', 0.1)}`,
   position: 'relative',
   overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '4px',
-    background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-  },
 }));
 
-const FooterLink = styled(MuiLink)(({ theme }) => ({
+const FooterLink = styled(Link)(({ theme }) => ({
   display: 'block',
-  marginBottom: theme.spacing(1),
-  transition: 'all 0.3s ease',
+  marginBottom: theme.spacing(1.5),
+  color: 'rgba(255, 255, 255, 0.6)',
+  textDecoration: 'none',
+  fontSize: '0.95rem',
+  transition: 'all 0.2s ease',
   '&:hover': {
-    color: theme.palette.primary.main,
+    color: '#3b82f6',
     transform: 'translateX(5px)',
   },
 }));
 
 const SocialIcon = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.text.secondary,
+  color: 'rgba(255, 255, 255, 0.6)',
+  backgroundColor: alpha('#ffffff', 0.05),
+  marginRight: theme.spacing(1),
   transition: 'all 0.3s ease',
   '&:hover': {
-    color: theme.palette.primary.main,
+    color: '#3b82f6',
+    backgroundColor: alpha('#3b82f6', 0.1),
     transform: 'translateY(-3px)',
   },
 }));
@@ -87,14 +85,14 @@ const Footer = () => {
         >
           {/* Company Info */}
           <Box component={motion.div} variants={itemVariants}>
-            <Typography 
-              variant="h5" 
-              component={Link} 
-              to="/" 
-              sx={{ 
-                fontWeight: 700,
+            <Typography
+              variant="h5"
+              component={Link}
+              to="/"
+              sx={{
+                fontWeight: 800,
                 textDecoration: 'none',
-                color: 'inherit',
+                color: 'white',
                 display: 'inline-block',
                 mb: 2,
                 '&:hover': {
@@ -104,39 +102,43 @@ const Footer = () => {
             >
               LegalAI
             </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Your intelligent legal document assistant powered by AI
+            <Typography variant="body2" sx={{ mb: 3, color: 'rgba(255,255,255,0.6)', maxWidth: '280px' }}>
+              Your intelligent legal document assistant powered by advanced AI and Retrieval-Augmented Generation.
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <SocialIcon 
-                component={motion.a} 
+              <SocialIcon
+                component={motion.a}
                 whileHover={{ scale: 1.1 }}
-                href="https://linkedin.com" 
+                href="https://linkedin.com/in/waqarahmad1"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <LinkedIn />
               </SocialIcon>
-              <SocialIcon 
-                component={motion.a} 
+              <SocialIcon
+                component={motion.a}
                 whileHover={{ scale: 1.1 }}
-                href="https://github.com" 
+                href="https://github.com/Waqar-Ahmad1"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <GitHub />
               </SocialIcon>
-              <SocialIcon 
-                component={motion.a} 
+              <SocialIcon
+                component={motion.a}
                 whileHover={{ scale: 1.1 }}
-                href="https://twitter.com" 
+                href="https://twitter.com"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <Twitter />
               </SocialIcon>
-              <SocialIcon 
-                component={motion.a} 
+              <SocialIcon
+                component={motion.a}
                 whileHover={{ scale: 1.1 }}
-                href="mailto:contact@legalai.com" 
+                href="mailto:waqarahmadisbest@gmail.com"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <Email />
               </SocialIcon>
@@ -145,68 +147,68 @@ const Footer = () => {
 
           {/* Quick Links */}
           <Box component={motion.div} variants={itemVariants}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: 'white' }}>
               Quick Links
             </Typography>
-            <FooterLink 
-              component={Link} 
-              to="/" 
+            <FooterLink
+              component={Link}
+              to="/login"
+              underline="none"
+            >
+              Login
+            </FooterLink>
+            <FooterLink
+              component={Link}
+              to="/register"
+              underline="none"
+            >
+              Register
+            </FooterLink>
+            <FooterLink
+              component={Link}
+              to="/"
               underline="none"
             >
               Home
             </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/dashboard" 
+            <FooterLink
+              component={Link}
+              to="/about"
               underline="none"
             >
-              Dashboard
+              About
             </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/upload" 
+            <FooterLink
+              component={Link}
+              to="/try-it"
               underline="none"
             >
-              Upload Documents
-            </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/pricing" 
-              underline="none"
-            >
-              Pricing
+              TryItNow
             </FooterLink>
           </Box>
 
           {/* Resources */}
           <Box component={motion.div} variants={itemVariants}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: 'white' }}>
               Resources
             </Typography>
-            <FooterLink 
-              component={Link} 
-              to="/blog" 
-              underline="none"
-            >
-              Blog
-            </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/documentation" 
+            <FooterLink
+              component={Link}
+              to="/documentation"
               underline="none"
             >
               Documentation
             </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/faq" 
+            <FooterLink
+              component={Link}
+              to="/faq"
               underline="none"
             >
               FAQs
             </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/support" 
+            <FooterLink
+              component={Link}
+              to="/support"
               underline="none"
             >
               Support
@@ -215,33 +217,33 @@ const Footer = () => {
 
           {/* Legal */}
           <Box component={motion.div} variants={itemVariants}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: 'white' }}>
               Legal
             </Typography>
-            <FooterLink 
-              component={Link} 
-              to="/privacy" 
+            <FooterLink
+              component={Link}
+              to="/privacy"
               underline="none"
             >
               Privacy Policy
             </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/terms" 
+            <FooterLink
+              component={Link}
+              to="/terms"
               underline="none"
             >
               Terms of Service
             </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/cookies" 
+            <FooterLink
+              component={Link}
+              to="/cookies"
               underline="none"
             >
               Cookie Policy
             </FooterLink>
-            <FooterLink 
-              component={Link} 
-              to="/gdpr" 
+            <FooterLink
+              component={Link}
+              to="/gdpr"
               underline="none"
             >
               GDPR Compliance
@@ -251,15 +253,15 @@ const Footer = () => {
 
         <Divider sx={{ my: 3 }} />
 
-        <Box 
+        <Box
           component={motion.div}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          sx={{ 
-            display: 'flex', 
-            flexDirection: { xs: 'column', sm: 'row' }, 
-            alignItems: 'center', 
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: 'center',
             justifyContent: 'space-between',
             textAlign: 'center'
           }}

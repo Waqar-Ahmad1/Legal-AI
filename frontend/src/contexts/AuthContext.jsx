@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/authApi';
+import { authAPI as api } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -12,36 +12,51 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await api.verifyToken();
-        setUser(response.data.user);
+        const data = await api.validateToken();
+        if (data.success) {
+          setUser(data.data.user);
+        } else {
+          localStorage.removeItem('authToken');
+          setUser(null);
+        }
       } catch (error) {
-        localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
-    
-    const token = localStorage.getItem('token');
+
+    const token = localStorage.getItem('authToken');
     if (token) checkAuth();
     else setLoading(false);
   }, []);
 
   const login = async (credentials) => {
-    const response = await api.login(credentials);
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    navigate('/dashboard');
+    const data = await api.login(credentials);
+    if (data.success && data.data?.access_token) {
+      localStorage.setItem('authToken', data.data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      setUser(data.data.user);
+      navigate('/try-it');
+    }
+    return data;
   };
 
   const register = async (userData) => {
-    const response = await api.register(userData);
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    navigate('/dashboard');
+    const data = await api.register(userData);
+    if (data.success && data.data?.access_token) {
+      localStorage.setItem('authToken', data.data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      setUser(data.data.user);
+      navigate('/try-it');
+    }
+    return data;
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     setUser(null);
     navigate('/login');
   };

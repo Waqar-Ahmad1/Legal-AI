@@ -1,16 +1,19 @@
 // src/services/api.js
-const API_BASE_URL = 'http://localhost:8000';
-const API_KEY = 'PLERkcJ-bJNQDJFGVxpBiNTGb0puWQRgq0USeoWLciQ';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 // Generic API request function with proper headers
 const apiRequest = async (endpoint, options = {}) => {
+  const token = localStorage.getItem('authToken');
   const config = {
     method: options.method || 'GET',
     headers: {
-      'X-API-Key': API_KEY,
       ...options.headers,
     },
   };
+
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
 
   // Handle request body
   if (options.body) {
@@ -33,39 +36,39 @@ const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    
+
     console.log(`📨 Response status: ${response.status} ${response.statusText}`);
-    
+
     if (!response.ok) {
       let errorData;
       try {
         errorData = await response.json();
         console.error('❌ API error response data:', errorData);
       } catch (parseError) {
-        errorData = { 
+        errorData = {
           detail: `HTTP ${response.status} ${response.statusText}`,
           status: response.status
         };
         console.error('❌ API error (non-JSON response):', errorData);
       }
-      
+
       // Create a more detailed error message
-      const errorMessage = errorData.detail || 
-                          errorData.message || 
-                          errorData.error || 
-                          `Request failed with status ${response.status}`;
-      
+      const errorMessage = errorData.detail ||
+        errorData.message ||
+        errorData.error ||
+        `Request failed with status ${response.status}`;
+
       const enhancedError = new Error(errorMessage);
       enhancedError.status = response.status;
       enhancedError.data = errorData;
-      
+
       throw enhancedError;
     }
-    
+
     const data = await response.json();
     console.log('✅ API success response:', data);
     return data;
-    
+
   } catch (error) {
     console.error('❌ API request failed:', {
       message: error.message,
@@ -74,13 +77,13 @@ const apiRequest = async (endpoint, options = {}) => {
       endpoint,
       method: config.method
     });
-    
+
     // Re-throw with enhanced information
     const enhancedError = new Error(error.message || 'Network request failed');
     enhancedError.status = error.status;
     enhancedError.data = error.data;
     enhancedError.originalError = error;
-    
+
     throw enhancedError;
   }
 };
@@ -101,10 +104,10 @@ export const chatAPI = {
   // Alternative method that accepts different payload formats
   sendChat: async (payload) => {
     // Handle both string messages and object payloads
-    const requestBody = typeof payload === 'string' 
+    const requestBody = typeof payload === 'string'
       ? { query: payload }
       : payload.query ? payload : { query: payload.message || payload.text };
-    
+
     return await apiRequest('/chat', {
       method: 'POST',
       body: requestBody,
@@ -115,13 +118,13 @@ export const chatAPI = {
   streamMessage: async (message, onChunk) => {
     try {
       const response = await chatAPI.sendMessage(message);
-      
+
       if (response.success && response.data && onChunk) {
         // Simulate streaming by breaking response into chunks
         const answer = response.data.answer;
         const words = answer.split(' ');
         let currentText = '';
-        
+
         for (let i = 0; i < words.length; i++) {
           currentText += words[i] + ' ';
           onChunk(currentText.trim());
@@ -129,7 +132,7 @@ export const chatAPI = {
           await new Promise(resolve => setTimeout(resolve, 30));
         }
       }
-      
+
       return response;
     } catch (error) {
       console.error('Stream chat error:', error);
@@ -211,12 +214,17 @@ export const authAPI = {
 export const adminAPI = {
   // Dashboard stats
   getDashboardStats: async () => {
-    return await apiRequest('/admin/dashboard/stats');
+    return await apiRequest('/admin/stats');
   },
 
   // Training history
-  getTrainingHistory: async (page = 1, limit = 10) => {
-    return await apiRequest(`/admin/training/history?page=${page}&limit=${limit}`);
+  getTrainingHistory: async (page = 1, limit = 50) => {
+    return await apiRequest(`/admin/training-history?page=${page}&limit=${limit}`);
+  },
+
+  // System status
+  getSystemStatus: async () => {
+    return await apiRequest('/admin/system-status');
   },
 
   // Upload document
@@ -257,7 +265,7 @@ export const adminAPI = {
 export const saveConversation = async (userId, conversation) => {
   try {
     console.log('Saving conversation for user:', userId);
-    
+
     // For now, store in localStorage since backend doesn't have conversation endpoints
     const key = `conversations_${userId}`;
     const conversations = JSON.parse(localStorage.getItem(key) || '[]');
@@ -267,10 +275,10 @@ export const saveConversation = async (userId, conversation) => {
       userId: userId,
       savedAt: new Date().toISOString()
     };
-    
+
     conversations.push(newConversation);
     localStorage.setItem(key, JSON.stringify(conversations));
-    
+
     return {
       success: true,
       data: newConversation
@@ -284,11 +292,11 @@ export const saveConversation = async (userId, conversation) => {
 export const getConversations = async (userId) => {
   try {
     console.log('Fetching conversations for user:', userId);
-    
+
     // Get from localStorage
     const key = `conversations_${userId}`;
     const conversations = JSON.parse(localStorage.getItem(key) || '[]');
-    
+
     return {
       success: true,
       data: conversations
@@ -302,7 +310,7 @@ export const getConversations = async (userId) => {
 export const deleteConversation = async (conversationId) => {
   try {
     console.log('Deleting conversation:', conversationId);
-    
+
     // Get user from localStorage
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     if (userData.id) {
@@ -311,7 +319,7 @@ export const deleteConversation = async (conversationId) => {
       const filteredConversations = conversations.filter(conv => conv.id !== conversationId);
       localStorage.setItem(key, JSON.stringify(filteredConversations));
     }
-    
+
     return {
       success: true,
       message: 'Conversation deleted successfully',
@@ -349,25 +357,25 @@ export const healthAPI = {
   // Test all endpoints
   testAllEndpoints: async () => {
     const results = {};
-    
+
     try {
       results.root = await healthAPI.getRoot();
     } catch (error) {
       results.root = { success: false, error: error.message };
     }
-    
+
     try {
       results.health = await healthAPI.checkHealth();
     } catch (error) {
       results.health = { success: false, error: error.message };
     }
-    
+
     try {
       results.chat = await chatAPI.testConnection();
     } catch (error) {
       results.chat = { success: false, error: error.message };
     }
-    
+
     return results;
   }
 };
@@ -385,9 +393,9 @@ export const debugAPI = {
       { name: 'Message object', payload: { message: 'Test message' } },
       { name: 'Text object', payload: { text: 'Test message' } }
     ];
-    
+
     const results = [];
-    
+
     for (const test of tests) {
       try {
         console.log(`🧪 Testing: ${test.name}`);
@@ -405,10 +413,10 @@ export const debugAPI = {
         });
       }
     }
-    
+
     return results;
   },
-  
+
   // Check backend connectivity
   checkBackendConnectivity: async () => {
     try {
