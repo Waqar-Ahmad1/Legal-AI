@@ -568,57 +568,41 @@ async def train_chatbot_api(
 # ADMIN DASHBOARD ENDPOINTS
 # ========================
 
-@router.get("/admin/dashboard/stats", response_model=APIResponse)
+@router.get("/admin/stats", response_model=APIResponse)
 async def get_admin_dashboard_stats(admin: dict = Depends(get_current_admin)):
-    """Get admin dashboard statistics"""
+    """Get admin dashboard statistics - matches frontend /admin/stats"""
     try:
         logger.info("📊 Admin dashboard stats requested")
         
         if not is_database_connected():
             return APIResponse(
                 success=False,
-                message="Database temporarily unavailable"
+                message="Database temporarily unavailable",
+                data={
+                    "totalDocuments": 0,
+                    "totalUsers": 0,
+                    "activeModels": 1,
+                    "lastTraining": None
+                }
             )
         
         # Get collections
         users_collection = get_users_collection()
-        admins_collection = get_admins_collection()
         training_collection = get_training_collection()
         
         # Calculate statistics
         total_users = users_collection.count_documents({})
-        total_admins = admins_collection.count_documents({})
         total_training_documents = training_collection.count_documents({})
         
-        # Active users (logged in last 30 days)
-        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-        active_users = users_collection.count_documents({
-            "last_login": {"$gte": thirty_days_ago}
-        })
-        
-        # Recent training documents (last 7 days)
-        seven_days_ago = datetime.utcnow() - timedelta(days=7)
-        recent_training = training_collection.count_documents({
-            "uploadDate": {"$gte": seven_days_ago}
-        })
-        
-        # Get vector store document count
-        try:
-            from app.config import load_vector_store
-            store = load_vector_store()
-            vector_doc_count = len(store.index_to_docstore_id)
-        except:
-            vector_doc_count = 0
+        # Get last training date
+        last_doc = training_collection.find_one(sort=[("uploadDate", -1)])
+        last_training = last_doc["uploadDate"].isoformat() if last_doc else None
         
         stats = {
-            "total_users": total_users,
-            "total_admins": total_admins,
-            "total_training_documents": total_training_documents,
-            "active_users": active_users,
-            "recent_training_documents": recent_training,
-            "vector_store_documents": vector_doc_count,
-            "system_status": "operational",
-            "last_updated": datetime.utcnow().isoformat()
+            "totalDocuments": total_training_documents,
+            "totalUsers": total_users,
+            "activeModels": 1,
+            "lastTraining": last_training
         }
         
         logger.info(f"✅ Dashboard stats: {total_users} users, {total_training_documents} training docs")
@@ -635,31 +619,28 @@ async def get_admin_dashboard_stats(admin: dict = Depends(get_current_admin)):
             message=f"Failed to retrieve dashboard statistics: {str(e)}"
         )
 
-@router.get("/admin/training/history", response_model=APIResponse)
+@router.get("/admin/training-history", response_model=APIResponse)
 async def get_training_history(
     admin: dict = Depends(get_current_admin),
     page: int = 1,
-    limit: int = 10
+    limit: int = 50
 ):
-    """Get training document history with pagination"""
+    """Get training document history - matches frontend /admin/training-history"""
     try:
         logger.info(f"📚 Training history requested - page {page}, limit {limit}")
         
         if not is_database_connected():
             return APIResponse(
-                success=False,
-                message="Database temporarily unavailable"
+                success=True,
+                message="Returning empty history (database disconnected)",
+                data={"history": []}
             )
         
         training_collection = get_training_collection()
         
-        # Calculate skip for pagination
-        skip = (page - 1) * limit
-        
-        # Get training documents with pagination
+        # Get training documents (no pagination for simplicity in first pass, or keep it)
         training_docs = list(training_collection.find()
             .sort("uploadDate", -1)
-            .skip(skip)
             .limit(limit))
         
         # Convert ObjectId to string and format dates
@@ -668,25 +649,12 @@ async def get_training_history(
             if isinstance(doc.get("uploadDate"), datetime):
                 doc["uploadDate"] = doc["uploadDate"].isoformat()
         
-        # Get total count for pagination
-        total_documents = training_collection.count_documents({})
-        total_pages = (total_documents + limit - 1) // limit
-        
-        pagination_info = {
-            "current_page": page,
-            "total_pages": total_pages,
-            "total_documents": total_documents,
-            "has_next": page < total_pages,
-            "has_prev": page > 1
-        }
-        
         logger.info(f"✅ Training history: {len(training_docs)} documents retrieved")
         return APIResponse(
             success=True,
             message="Training history retrieved successfully",
             data={
-                "documents": training_docs,
-                "pagination": pagination_info
+                "history": training_docs
             }
         )
         
@@ -696,6 +664,38 @@ async def get_training_history(
             success=False,
             message=f"Failed to retrieve training history: {str(e)}"
         )
+
+@router.get("/admin/system-status", response_model=APIResponse)
+async def get_system_status(admin: dict = Depends(get_current_admin)):
+    """Integrated system health monitoring"""
+    try:
+        db_connected = is_database_connected()
+        
+        from app.config import ai_provider, load_vector_store
+        provider_info = ai_provider.get_provider_info()
+        
+        try:
+            store = load_vector_store()
+            vector_doc_count = len(store.index_to_docstore_id)
+        except:
+            vector_doc_count = 0
+
+        status_info = {
+            "backend": "online",
+            "database": "online" if db_connected else "offline",
+            "vector": "online" if vector_doc_count > 0 else "empty",
+            "ai": "online" if not provider_info.get("fallback_mode", False) else "degraded",
+            "details": status_info if 'status_info' in locals() else {}
+        }
+
+        return APIResponse(
+            success=True,
+            message="System pulse retrieved",
+            data=status_info
+        )
+    except Exception as e:
+        logger.error(f"System status error: {e}")
+        return APIResponse(success=False, message=str(e))
 
 @router.get("/admin/users", response_model=APIResponse)
 async def get_users_list(
