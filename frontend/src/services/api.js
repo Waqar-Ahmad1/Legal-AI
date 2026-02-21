@@ -201,6 +201,38 @@ export const authAPI = {
     });
   },
 
+  // Verify email address
+  verifyEmail: async (token) => {
+    return await apiRequest('/verify-email', {
+      method: 'POST',
+      body: { token }
+    });
+  },
+
+  // Resend verification email
+  resendVerification: async (email) => {
+    return await apiRequest('/resend-verification', {
+      method: 'POST',
+      body: { email }
+    });
+  },
+
+  // Forgot password request
+  forgotPassword: async (email) => {
+    return await apiRequest('/forgot-password', {
+      method: 'POST',
+      body: { email }
+    });
+  },
+
+  // Reset password with token
+  resetPassword: async (token, password) => {
+    return await apiRequest('/reset-password', {
+      method: 'POST',
+      body: { token, password }
+    });
+  },
+
   // Validate token
   validateToken: async () => {
     return await apiRequest('/auth/validate');
@@ -222,8 +254,8 @@ export const adminAPI = {
     return await apiRequest(`/admin/training-history?page=${page}&limit=${limit}`);
   },
 
-  // System status
-  getSystemStatus: async () => {
+  // Detailed system status (Admin only)
+  getAdminSystemStatus: async () => {
     return await apiRequest('/admin/system-status');
   },
 
@@ -245,7 +277,7 @@ export const adminAPI = {
     return await apiRequest(`/admin/users?page=${page}&limit=${limit}`);
   },
 
-  // System status
+  // Public system status
   getSystemStatus: async () => {
     return await apiRequest('/system/status');
   },
@@ -254,6 +286,18 @@ export const adminAPI = {
   deleteTrainingDocument: async (documentId) => {
     return await apiRequest(`/admin/training/document/${documentId}`, {
       method: 'DELETE',
+    });
+  },
+
+  // Settings Management
+  getSettings: async () => {
+    return await apiRequest('/admin/settings');
+  },
+
+  updateSettings: async (settingsData) => {
+    return await apiRequest('/admin/settings', {
+      method: 'PATCH',
+      body: settingsData
     });
   }
 };
@@ -437,6 +481,50 @@ export const debugAPI = {
   }
 };
 
+
+// ========================
+// Support API Functions
+// ========================
+
+export const supportAPI = {
+  // Submit new ticket
+  submitTicket: async (ticketData) => {
+    return await apiRequest('/support/ticket', {
+      method: 'POST',
+      body: ticketData
+    });
+  },
+
+  // Get all tickets (Admin)
+  getTickets: async (filter = null, page = 1, limit = 50) => {
+    let url = `/admin/support/tickets?page=${page}&limit=${limit}`;
+    if (filter) url += `&status_filter=${filter}`;
+    return await apiRequest(url);
+  },
+
+  // Mark ticket as read (Admin)
+  markAsRead: async (ticketId) => {
+    return await apiRequest(`/admin/support/tickets/${ticketId}/read`, {
+      method: 'PATCH'
+    });
+  },
+
+  // Reply to ticket (Admin)
+  replyToTicket: async (ticketId, replyData) => {
+    return await apiRequest(`/admin/support/tickets/${ticketId}/reply`, {
+      method: 'POST',
+      body: replyData
+    });
+  },
+
+  // Delete ticket (Admin)
+  deleteTicket: async (ticketId) => {
+    return await apiRequest(`/admin/support/tickets/${ticketId}`, {
+      method: 'DELETE'
+    });
+  }
+};
+
 // ========================
 // Default Export with all APIs
 // ========================
@@ -446,6 +534,7 @@ export default {
   auth: authAPI,
   admin: adminAPI,
   health: healthAPI,
+  support: supportAPI,
   debug: debugAPI,
   saveConversation,
   getConversations,

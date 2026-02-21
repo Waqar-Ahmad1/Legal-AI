@@ -76,6 +76,9 @@ class DatabaseManager:
             self.db.documents.create_index("document_id")
             self.db.users.create_index("created_at")
             self.db.admins.create_index("created_at")
+            self.db.support_tickets.create_index("created_at")
+            self.db.support_tickets.create_index("status")
+            self.db.system_settings.create_index("updated_at")
             
             logger.info("✅ Database indexes created successfully")
         except Exception as e:
@@ -129,6 +132,18 @@ def get_training_collection():
     if not db_manager.is_connected:
         raise RuntimeError("Database not connected. Cannot access training documents collection.")
     return db_manager.get_collection("training_documents")
+
+def get_support_collection():
+    """Get support tickets collection - fails if database not connected"""
+    if not db_manager.is_connected:
+        raise RuntimeError("Database not connected. Cannot access support collection.")
+    return db_manager.get_collection("support_tickets")
+
+def get_settings_collection():
+    """Get system settings collection - fails if database not connected"""
+    if not db_manager.is_connected:
+        raise RuntimeError("Database not connected. Cannot access settings collection.")
+    return db_manager.get_collection("system_settings")
 
 def get_documents_collection():
     """Get documents collection - fails if database not connected"""

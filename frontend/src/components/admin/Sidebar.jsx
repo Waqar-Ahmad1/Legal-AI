@@ -20,7 +20,8 @@ import {
     MenuOpen as MenuOpenIcon,
     Menu as MenuIcon,
     Psychology,
-    Shield
+    Shield,
+    SupportAgent
 } from '@mui/icons-material';
 
 
@@ -64,6 +65,7 @@ const Sidebar = ({ currentTab, onTabChange, onLogout, collapsed, setCollapsed })
         { id: 'overview', label: 'Overview', icon: <DashboardIcon /> },
         { id: 'training', label: 'Training Center', icon: <Psychology /> },
         { id: 'users', label: 'User Management', icon: <UsersIcon /> },
+        { id: 'support', label: 'Customer Support', icon: <SupportAgent /> },
         { id: 'audit', label: 'System Audit', icon: <AuditIcon /> },
         { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
     ];

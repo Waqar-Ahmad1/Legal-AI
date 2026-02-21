@@ -8,7 +8,10 @@ const Users = () => {
     return (
         <Fade in timeout={500}>
             <Box>
-                <UserManagement users={adminData.users} />
+                <UserManagement
+                    users={adminData.users}
+                    totalUsers={adminData.stats.totalUsers}
+                />
             </Box>
         </Fade>
     );

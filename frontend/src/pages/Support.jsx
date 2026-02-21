@@ -38,6 +38,7 @@ import {
     Star,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supportAPI } from '../services/api';
 
 const HeroSection = styled(Box)(({ theme }) => ({
     background: 'linear-gradient(135deg, #020617 0%, #0f172a 100%)',
@@ -113,15 +114,33 @@ const Support = () => {
     const [form, setForm] = useState({ name: '', email: '', type: '', priority: 'Medium', subject: '', message: '' });
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [ticketRef, setTicketRef] = useState('');
 
-    const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    const handleChange = e => {
+        setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+        setError(null);
+    };
 
     const handleSubmit = async e => {
         e.preventDefault();
         setLoading(true);
-        await new Promise(r => setTimeout(r, 1500));
-        setSubmitted(true);
-        setLoading(false);
+        setError(null);
+
+        try {
+            const response = await supportAPI.submitTicket(form);
+            if (response.success) {
+                setTicketRef(response.data.ticket_ref);
+                setSubmitted(true);
+            } else {
+                setError(response.message || 'Failed to submit ticket. Please try again.');
+            }
+        } catch (err) {
+            console.error('Support submission error:', err);
+            setError('System error occurred. Please contact us via email if this persists.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -223,11 +242,13 @@ const Support = () => {
                             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>Submit a Support Ticket</Typography>
                             <Typography color="text.secondary" sx={{ mb: 4 }}>Fill in the form and our team will respond within 24 hours.</Typography>
 
+                            {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }}>{error}</Alert>}
+
                             {submitted ? (
                                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
                                     <Alert severity="success" sx={{ borderRadius: '16px', p: 3 }}>
                                         <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>Ticket submitted successfully! 🎉</Typography>
-                                        <Typography>We've received your message and will get back to you at <strong>{form.email}</strong> within 24 hours. Your ticket reference number will be emailed to you shortly.</Typography>
+                                        <Typography>We've received your message and will get back to you at <strong>{form.email}</strong> within 24 hours. Your ticket reference number is: <strong>#{ticketRef}</strong>. Keep this for your records.</Typography>
                                     </Alert>
                                 </motion.div>
                             ) : (

@@ -20,6 +20,8 @@ from urllib3.exceptions import HTTPError
 import time
 import requests
 from requests.exceptions import RequestException
+import json
+
 
 # Force IPv4 and disable SSL verification for compatibility
 socket.AF_INET = socket.AF_INET
@@ -328,8 +330,14 @@ class SmartAIProvider:
     def _test_gemini_connection(self, api_key: str) -> dict:
         """Test Gemini API connection with comprehensive quota checking"""
         try:
-            genai.configure(api_key=api_key)
-            models = list(genai.list_models())  # Convert generator to list
+            options = {}
+            # Some versions of generativeai don't support timeout in list_models
+            try:
+                models = list(genai.list_models())
+            except TypeError:
+                # Fallback for older versions
+                models = list(genai.list_models())
+
             
             # Test actual embedding to check quota
             try:

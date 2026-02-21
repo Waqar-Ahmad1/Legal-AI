@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 import {
   Box,
   Typography,
@@ -103,6 +103,7 @@ const GradientButton = styled(Button)(({ theme }) => ({
   fontSize: '1rem',
   textTransform: 'none',
   marginTop: theme.spacing(2),
+  color: '#ffffff',
   background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
   boxShadow: '0 10px 20px -5px rgba(59, 130, 246, 0.4)',
   transition: 'all 0.3s ease',
@@ -118,6 +119,7 @@ const GradientButton = styled(Button)(({ theme }) => ({
 }));
 
 const Login = () => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -126,6 +128,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [serverMessage, setServerMessage] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -145,11 +148,29 @@ const Login = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.email.trim()) newErrors.email = 'Email already required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
     else if (!isValidEmail(formData.email)) newErrors.email = 'Please enter a valid email address';
     if (!formData.password) newErrors.password = 'Password is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleResendVerification = async () => {
+    if (!formData.email) return;
+    setResendLoading(true);
+    try {
+      const { authAPI } = await import('../services/api');
+      const data = await authAPI.resendVerification(formData.email);
+      if (data.success) {
+        setServerMessage({ type: 'success', text: 'Verification email resent! Please check your inbox.' });
+      } else {
+        setServerMessage({ type: 'error', text: data.message || 'Failed to resend email.' });
+      }
+    } catch (error) {
+      setServerMessage({ type: 'error', text: error.data?.message || 'Failed to resend email.' });
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -168,16 +189,21 @@ const Login = () => {
         email: formData.email.trim().toLowerCase(),
         password: formData.password
       };
-      const data = await authAPI.login(payload);
+      const data = await login(payload);
       if (data.success) {
-        if (data.data?.access_token) {
-          localStorage.setItem("authToken", data.data.access_token);
-          localStorage.setItem("user", JSON.stringify(data.data.user));
-          setServerMessage({ type: 'success', text: 'Login successful! Redirecting...' });
-          setTimeout(() => navigate("/try-it"), 1500);
-        }
+        setServerMessage({ type: 'success', text: 'Login successful! Redirecting...' });
+        // Navigation is handled inside login() function in AuthContext
       } else {
-        setServerMessage({ type: 'error', text: data.message || 'Login failed.' });
+        // Handle unverified account
+        if (data.data?.unverified) {
+          setServerMessage({
+            type: 'error',
+            text: data.message,
+            unverified: true
+          });
+        } else {
+          setServerMessage({ type: 'error', text: data.message || 'Login failed.' });
+        }
       }
     } catch (error) {
       setServerMessage({ type: 'error', text: error.data?.detail || error.message || 'Login failed.' });
@@ -230,19 +256,41 @@ const Login = () => {
             </Box>
 
             {serverMessage && (
-              <Alert
-                severity={serverMessage.type}
-                sx={{
-                  mb: 3,
-                  borderRadius: '12px',
-                  backgroundColor: serverMessage.type === 'success' ? alpha('#10b981', 0.1) : alpha('#ef4444', 0.1),
-                  color: serverMessage.type === 'success' ? '#10b981' : '#ef4444',
-                  border: `1px solid ${serverMessage.type === 'success' ? alpha('#10b981', 0.2) : alpha('#ef4444', 0.2)}`,
-                  '& .MuiAlert-icon': { color: 'inherit' }
-                }}
-              >
-                {serverMessage.text}
-              </Alert>
+              <Box sx={{ mb: 3 }}>
+                <Alert
+                  severity={serverMessage.type}
+                  sx={{
+                    borderRadius: '12px',
+                    backgroundColor: serverMessage.type === 'success' ? alpha('#10b981', 0.1) : alpha('#ef4444', 0.1),
+                    color: serverMessage.type === 'success' ? '#10b981' : '#ef4444',
+                    border: `1px solid ${serverMessage.type === 'success' ? alpha('#10b981', 0.2) : alpha('#ef4444', 0.2)}`,
+                    '& .MuiAlert-icon': { color: 'inherit' },
+                    '& .MuiAlert-message': { width: '100%' }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography variant="body2">{serverMessage.text}</Typography>
+                    {serverMessage.unverified && (
+                      <Button
+                        size="small"
+                        onClick={handleResendVerification}
+                        disabled={resendLoading}
+                        sx={{
+                          alignSelf: 'flex-start',
+                          color: '#3b82f6',
+                          fontWeight: 700,
+                          textTransform: 'none',
+                          p: 0,
+                          minWidth: 0,
+                          '&:hover': { background: 'transparent', textDecoration: 'underline', color: '#60a5fa' }
+                        }}
+                      >
+                        {resendLoading ? 'Resending...' : 'Resend Verification Email'}
+                      </Button>
+                    )}
+                  </Box>
+                </Alert>
+              </Box>
             )}
 
             <Box component="form" onSubmit={handleSubmit} noValidate>

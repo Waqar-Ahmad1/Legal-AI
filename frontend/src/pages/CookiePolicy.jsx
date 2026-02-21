@@ -32,10 +32,9 @@ const cookieTypes = [
         canToggle: false,
         description: 'These cookies are essential for the website to function. They enable core features like login, security tokens, and session management.',
         examples: [
-            { name: 'authToken', purpose: 'Stores your JWT authentication token', duration: 'Session / 24h', type: 'localStorage' },
-            { name: 'adminToken', purpose: 'Stores admin JWT token for dashboard access', duration: 'Session', type: 'localStorage' },
-            { name: 'adminUser', purpose: 'Stores admin username for display', duration: 'Session', type: 'localStorage' },
-            { name: 'userData', purpose: 'Cached user profile data', duration: 'Session', type: 'localStorage' },
+            { name: 'authToken', purpose: 'Stores your JWT authentication token for user and admin access', duration: 'Session / 24h', type: 'localStorage' },
+            { name: 'adminUser', purpose: 'Stores admin profile data for dashboard display', duration: 'Session', type: 'localStorage' },
+            { name: 'user', purpose: 'Cached user profile data', duration: 'Session', type: 'localStorage' },
         ],
     },
     {

@@ -10,8 +10,8 @@ import traceback
 
 # Third-party imports
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredFileLoader, Docx2txtLoader, TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 import faiss
 from urllib3.exceptions import HTTPError

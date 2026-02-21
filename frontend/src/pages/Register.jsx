@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 import {
   Box,
   Typography,
@@ -106,6 +106,7 @@ const GradientButton = styled(Button)(({ theme }) => ({
   fontSize: '1rem',
   textTransform: 'none',
   marginTop: theme.spacing(2),
+  color: '#ffffff',
   background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
   boxShadow: '0 10px 20px -5px rgba(59, 130, 246, 0.4)',
   transition: 'all 0.3s ease',
@@ -121,6 +122,7 @@ const GradientButton = styled(Button)(({ theme }) => ({
 }));
 
 const Register = () => {
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -135,13 +137,18 @@ const Register = () => {
   const [serverMessage, setServerMessage] = useState('');
   const navigate = useNavigate();
 
-  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = (email) => {
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    return gmailRegex.test(email);
+  };
 
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'Full name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!isValidEmail(formData.email)) newErrors.email = 'Please enter a valid email address';
+    else if (!isValidEmail(formData.email)) {
+      newErrors.email = 'Only valid @gmail.com accounts are allowed for registration';
+    }
     if (!formData.password) newErrors.password = 'Password is required';
     else if (formData.password.length < 6) newErrors.password = 'Minimum 6 characters';
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
@@ -166,7 +173,7 @@ const Register = () => {
         email: formData.email.trim().toLowerCase(),
         password: formData.password
       };
-      const data = await authAPI.register(payload);
+      const data = await register(payload);
       if (data.success) {
         setServerMessage({ type: 'success', text: 'Registration successful! Redirecting...' });
         setTimeout(() => navigate('/login', { state: { email: formData.email } }), 2000);

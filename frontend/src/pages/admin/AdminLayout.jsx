@@ -47,15 +47,15 @@ const AdminLayout = () => {
                 adminAPI.getDashboardStats(),
                 adminAPI.getTrainingHistory(),
                 adminAPI.getUsersList(),
-                adminAPI.getSystemStatus()
+                adminAPI.getAdminSystemStatus()
             ]);
 
-            setAdminData({
-                stats: statsRes.success ? statsRes.data : adminData.stats,
-                trainingHistory: historyRes.success ? (historyRes.data.documents || []) : [],
+            setAdminData(prev => ({
+                stats: statsRes.success ? statsRes.data : prev.stats,
+                trainingHistory: historyRes.success ? (historyRes.data.history || []) : [],
                 users: usersRes.success ? (usersRes.data.users || []) : [],
                 systemStatus: statusRes.success ? statusRes.data : {}
-            });
+            }));
 
         } catch (err) {
             console.error('Failed to fetch admin data:', err);
@@ -63,10 +63,9 @@ const AdminLayout = () => {
         } finally {
             setLoading(false);
         }
-    }, [adminData.stats]);
+    }, []);
 
     useEffect(() => {
-        // Auth check bypassed for development/demo mode
         fetchDashboardData();
     }, [fetchDashboardData]);
 
@@ -83,12 +82,13 @@ const AdminLayout = () => {
         navigate(`/admin/${tabId}`);
     };
 
-    return (
-        <Box sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: theme.palette.background.default }}>
-            <CircularProgress sx={{ color: theme.palette.primary.main }} />
-        </Box>
-    );
-
+    if (loading) {
+        return (
+            <Box sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: theme.palette.background.default }}>
+                <CircularProgress sx={{ color: theme.palette.primary.main }} />
+            </Box>
+        );
+    }
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: theme.palette.background.default }}>
             <Sidebar

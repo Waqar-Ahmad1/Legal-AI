@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Box, Fade } from '@mui/material';
 import { adminAPI } from '../../services/api';
@@ -7,52 +7,98 @@ import TrainingCenter from '../../components/admin/TrainingCenter';
 const Training = () => {
     const { fetchDashboardData } = useOutletContext();
 
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedFiles, setSelectedFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [uploadSuccess, setUploadSuccess] = useState(null);
-    const [uploadError, setUploadError] = useState(null);
+    const [batchProgress, setBatchProgress] = useState(0);
+    const [filesStatus, setFilesStatus] = useState({});
 
-    const handleFileSelect = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setUploadError(null);
-            setUploadSuccess(null);
+    const handleFilesSelect = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            setSelectedFiles(prev => [...prev, ...files]);
+            // Initialize status for new files
+            const newStatus = {};
+            files.forEach(file => {
+                newStatus[file.name] = { status: 'pending', progress: 0 };
+            });
+            setFilesStatus(prev => ({ ...prev, ...newStatus }));
         }
     };
 
+    const handleRemoveFile = (index) => {
+        const fileToRemove = selectedFiles[index];
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+        setFilesStatus(prev => {
+            const next = { ...prev };
+            delete next[fileToRemove.name];
+            return next;
+        });
+    };
+
+    const handleClearAll = () => {
+        setSelectedFiles([]);
+        setFilesStatus({});
+    };
+
     const handleUpload = async () => {
-        if (!selectedFile) return;
+        if (selectedFiles.length === 0) return;
 
         setUploading(true);
-        setUploadProgress(0);
-        setUploadError(null);
+        setBatchProgress(0);
 
-        const progressInterval = setInterval(() => {
-            setUploadProgress(prev => (prev < 90 ? prev + 10 : prev));
-        }, 300);
+        const adminData = JSON.parse(localStorage.getItem('adminUser') || '{}');
+        const totalFiles = selectedFiles.length;
 
-        try {
-            const adminData = JSON.parse(localStorage.getItem('adminUser') || '{}');
-            const response = await adminAPI.uploadDocument(selectedFile, adminData);
+        for (let i = 0; i < totalFiles; i++) {
+            const file = selectedFiles[i];
 
-            clearInterval(progressInterval);
-            setUploadProgress(100);
+            // Mark current file as processing
+            setFilesStatus(prev => ({
+                ...prev,
+                [file.name]: { ...prev[file.name], status: 'processing', progress: 0 }
+            }));
 
-            if (response.success) {
-                setUploadSuccess('Document successfully vectorized and indexed.');
-                setSelectedFile(null);
-                fetchDashboardData();
-            } else {
-                setUploadError(response.message || 'Upload failed');
+            // Individual file progress simulation pulse
+            let fileProgress = 0;
+            const progressInterval = setInterval(() => {
+                fileProgress = Math.min(fileProgress + 5, 95);
+                setFilesStatus(prev => ({
+                    ...prev,
+                    [file.name]: { ...prev[file.name], progress: fileProgress }
+                }));
+            }, 200);
+
+            try {
+                const response = await adminAPI.uploadDocument(file, adminData);
+
+                clearInterval(progressInterval);
+
+                if (response.success) {
+                    setFilesStatus(prev => ({
+                        ...prev,
+                        [file.name]: { status: 'success', progress: 100 }
+                    }));
+                } else {
+                    setFilesStatus(prev => ({
+                        ...prev,
+                        [file.name]: { status: 'error', progress: 0, error: response.message }
+                    }));
+                }
+            } catch (err) {
+                clearInterval(progressInterval);
+                setFilesStatus(prev => ({
+                    ...prev,
+                    [file.name]: { status: 'error', progress: 0, error: err.message }
+                }));
             }
-        } catch (err) {
-            clearInterval(progressInterval);
-            setUploadError(err.message || 'Upload failed');
-        } finally {
-            setUploading(false);
+
+            // Update aggregate batch progress
+            const newBatchProgress = Math.round(((i + 1) / totalFiles) * 100);
+            setBatchProgress(newBatchProgress);
         }
+
+        setUploading(false);
+        fetchDashboardData();
     };
 
     const formatFileSize = (bytes) => {
@@ -66,15 +112,15 @@ const Training = () => {
         <Fade in timeout={500}>
             <Box>
                 <TrainingCenter
-                    selectedFile={selectedFile}
-                    onFileSelect={handleFileSelect}
+                    selectedFiles={selectedFiles}
+                    onFilesSelect={handleFilesSelect}
                     onUpload={handleUpload}
                     uploading={uploading}
-                    uploadProgress={uploadProgress}
-                    error={uploadError}
-                    success={uploadSuccess}
-                    onRemoveFile={() => setSelectedFile(null)}
+                    batchProgress={batchProgress}
+                    filesStatus={filesStatus}
+                    onRemoveFile={handleRemoveFile}
                     formatFileSize={formatFileSize}
+                    onClearAll={handleClearAll}
                 />
             </Box>
         </Fade>

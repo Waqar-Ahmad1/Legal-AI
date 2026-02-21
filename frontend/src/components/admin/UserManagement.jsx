@@ -40,7 +40,24 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     },
 }));
 
-const UserManagement = ({ users = [] }) => {
+const UserManagement = ({ users = [], totalUsers = 0 }) => {
+    const formatTimestamp = (isoString) => {
+        if (!isoString) return 'Recent';
+        try {
+            const date = new Date(isoString);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        } catch (e) {
+            return 'Recent';
+        }
+    };
+
     return (
         <Box sx={glassBox}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
@@ -48,11 +65,13 @@ const UserManagement = ({ users = [] }) => {
                     <Box sx={{ p: 1, borderRadius: '8px', bgcolor: alpha('#3b82f6', 0.1), color: '#3b82f6' }}>
                         <PeopleIcon />
                     </Box>
-                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'white' }}>User Management</Typography>
+                    <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: 'white' }}>User Management</Typography>
+                        <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 600 }}>
+                            TOTAL COMMAND USERS: {totalUsers}
+                        </Typography>
+                    </Box>
                 </Box>
-                <Button size="small" variant="outlined" sx={{ borderRadius: '8px', color: '#3b82f6', borderColor: '#3b82f6' }}>
-                    Add New User
-                </Button>
             </Box>
 
             {users.length === 0 ? (
@@ -69,7 +88,6 @@ const UserManagement = ({ users = [] }) => {
                                 <TableCell sx={{ color: '#94a3b8', fontWeight: 700, borderBottom: `1px solid ${alpha('#94a3b8', 0.1)}`, py: 2 }}>ROLE</TableCell>
                                 <TableCell sx={{ color: '#94a3b8', fontWeight: 700, borderBottom: `1px solid ${alpha('#94a3b8', 0.1)}`, py: 2 }}>STATUS</TableCell>
                                 <TableCell sx={{ color: '#94a3b8', fontWeight: 700, borderBottom: `1px solid ${alpha('#94a3b8', 0.1)}`, py: 2 }}>JOINED</TableCell>
-                                <TableCell sx={{ color: '#94a3b8', fontWeight: 700, borderBottom: `1px solid ${alpha('#94a3b8', 0.1)}`, py: 2 }} align="right">ACTIONS</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -78,10 +96,10 @@ const UserManagement = ({ users = [] }) => {
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                             <Avatar sx={{ width: 32, height: 32, bgcolor: alpha('#3b82f6', 0.2), color: '#3b82f6', fontWeight: 700, fontSize: '0.8rem' }}>
-                                                {user.username?.charAt(0).toUpperCase() || 'U'}
+                                                {user.name?.charAt(0).toUpperCase() || 'U'}
                                             </Avatar>
                                             <Box>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{user.username}</Typography>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{user.name}</Typography>
                                                 <Typography variant="caption" sx={{ opacity: 0.5 }}>{user.email || 'no-email@legalai.com'}</Typography>
                                             </Box>
                                         </Box>
@@ -106,12 +124,9 @@ const UserManagement = ({ users = [] }) => {
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2">{user.joinedDate || 'Recent'}</Typography>
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        <IconButton size="small" sx={{ color: '#94a3b8' }}>
-                                            <MoreVert fontSize="inherit" />
-                                        </IconButton>
+                                        <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
+                                            {formatTimestamp(user.created_at)}
+                                        </Typography>
                                     </TableCell>
                                 </StyledTableRow>
                             ))}

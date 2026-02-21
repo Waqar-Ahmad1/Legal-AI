@@ -1,5 +1,6 @@
 // src/pages/TryItNow.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme, styled, alpha, keyframes } from '@mui/material/styles';
@@ -103,19 +104,23 @@ const SidebarToggle = styled(IconButton)(({ theme, isOpen }) => ({
   position: 'absolute',
   left: isOpen ? 320 : 0,
   top: '50%',
-  transform: 'translate(-50%, -50%)',
+  transform: 'translateY(-50%)',
   zIndex: 1000,
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  backgroundColor: '#3b82f6',
+  backgroundColor: alpha('#3b82f6', 0.9),
   color: 'white',
-  width: 28,
-  height: 56,
-  borderRadius: '0 8px 8px 0',
+  width: 24,
+  height: 48,
+  borderRadius: '0 6px 6px 0',
   '&:hover': {
-    backgroundColor: '#2563eb',
-    width: 32,
+    backgroundColor: '#3b82f6',
+    width: 28,
   },
-  boxShadow: '4px 0 12px rgba(0,0,0,0.3)',
+  boxShadow: '2px 0 8px rgba(0,0,0,0.3)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 0
 }));
 
 const MainSection = styled(Box)(({ theme }) => ({
@@ -633,7 +638,7 @@ const TryItNow = () => {
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {user && (
+              {user ? (
                 <>
                   <Tooltip title="Export Transcript">
                     <IconButton onClick={() => handleDownloadChat('txt')} sx={{ color: '#94a3b8' }}>
@@ -655,6 +660,26 @@ const TryItNow = () => {
                     <MenuItem onClick={logout} sx={{ gap: 1.5, color: '#ef4444' }}><Logout fontSize="small" /> Sign Out</MenuItem>
                   </Menu>
                 </>
+              ) : (
+                <Button
+                  component={Link}
+                  to="/login"
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    borderRadius: 2,
+                    borderColor: alpha('#3b82f6', 0.5),
+                    color: '#3b82f6',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    '&:hover': {
+                      borderColor: '#3b82f6',
+                      bgcolor: alpha('#3b82f6', 0.05)
+                    }
+                  }}
+                >
+                  Sign In
+                </Button>
               )}
             </Box>
           </ChatHeader>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../../../services/api';
+import { useAuth } from '../../../hooks/useAuth';
 import {
   Box,
   Typography,
@@ -11,22 +11,117 @@ import {
   Alert,
   IconButton,
   InputAdornment,
-  CssBaseline
+  CssBaseline,
+  CircularProgress,
+  Container,
+  Divider
 } from '@mui/material';
+import { styled, alpha } from '@mui/material/styles';
 import {
   HowToRegOutlined as HowToRegOutlinedIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
+  ArrowBack as ArrowBackIcon,
   Security as SecurityIcon
 } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 
-// API configuration
-// Removed hardcoded API_BASE_URL to use central service
+const PageWrapper = styled(Box)(({ theme }) => ({
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  background: '#020617',
+  position: 'relative',
+  overflow: 'hidden',
+  padding: theme.spacing(4, 0),
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    width: '1000px',
+    height: '1000px',
+    top: '-500px',
+    right: '-500px',
+    background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    width: '800px',
+    height: '800px',
+    bottom: '-400px',
+    left: '-400px',
+    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%)',
+    pointerEvents: 'none',
+  }
+}));
 
-// Validation patterns
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(5),
+  borderRadius: '24px',
+  background: alpha('#0f172a', 0.8),
+  backdropFilter: 'blur(20px)',
+  border: `1px solid ${alpha('#ffffff', 0.1)}`,
+  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+  width: '100%',
+  maxWidth: '500px',
+  position: 'relative',
+  zIndex: 1,
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: alpha('#ffffff', 0.03),
+    borderRadius: '12px',
+    transition: 'all 0.2s ease',
+    '& fieldset': {
+      borderColor: alpha('#ffffff', 0.1),
+    },
+    '&:hover fieldset': {
+      borderColor: alpha('#3b82f6', 0.5),
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#3b82f6',
+      borderWidth: '1.5px',
+    },
+  },
+  '& .MuiInputLabel-root': {
+    color: 'rgba(255, 255, 255, 0.5)',
+    '&.Mui-focused': {
+      color: '#3b82f6',
+    },
+  },
+  '& .MuiInputBase-input': {
+    color: '#ffffff',
+  },
+}));
+
+const GradientButton = styled(Button)(({ theme }) => ({
+  padding: '12px',
+  borderRadius: '12px',
+  fontWeight: 700,
+  fontSize: '1rem',
+  textTransform: 'none',
+  marginTop: theme.spacing(2),
+  color: '#ffffff',
+  background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+  boxShadow: '0 10px 20px -5px rgba(59, 130, 246, 0.4)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 15px 25px -5px rgba(59, 130, 246, 0.5)',
+    background: 'linear-gradient(135deg, #4f46e5 0%, #a855f7 100%)',
+  },
+  '&:disabled': {
+    background: alpha('#ffffff', 0.1),
+    color: alpha('#ffffff', 0.3),
+  }
+}));
 
 const AdminSignup = () => {
+  const { adminRegister } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -42,57 +137,20 @@ const AdminSignup = () => {
   const [serverMessage, setServerMessage] = useState('');
   const navigate = useNavigate();
 
-  // Email validation function
-  const isValidEmail = (email) => {
-    return EMAIL_REGEX.test(email);
-  };
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // Validation function
   const validateForm = () => {
     const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = 'Full name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!isValidEmail(formData.email)) newErrors.email = 'Please enter a valid email address';
 
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = 'Full name is required';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters long';
-    }
+    if (!formData.password) newErrors.password = 'Password is required';
+    else if (formData.password.length < 8) newErrors.password = 'Minimum 8 characters';
 
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
 
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters long';
-    } else if (!/(?=.*[a-z])/.test(formData.password)) {
-      newErrors.password = 'Password must contain at least one lowercase letter';
-    } else if (!/(?=.*[A-Z])/.test(formData.password)) {
-      newErrors.password = 'Password must contain at least one uppercase letter';
-    } else if (!/(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain at least one number';
-    } else if (!/(?=.*[@$!%*?&])/.test(formData.password)) {
-      newErrors.password = 'Password must contain at least one special character';
-    }
-
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    // Secret key validation
-    if (!formData.secret_key) {
-      newErrors.secret_key = 'Admin secret key is required';
-    } else if (formData.secret_key.length < 8) {
-      newErrors.secret_key = 'Secret key must be at least 8 characters long';
-    }
+    if (!formData.secret_key) newErrors.secret_key = 'Admin secret key is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -100,404 +158,142 @@ const AdminSignup = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-
-    // Clear server message when user makes changes
-    if (serverMessage) {
-      setServerMessage('');
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+    if (serverMessage) setServerMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setServerMessage('');
-
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     setLoading(true);
-
     try {
-      // Prepare payload according to backend expectations
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
         secret_key: formData.secret_key
       };
-
-      console.log('Sending admin registration request:', { ...payload, secret_key: '***' });
-
-      const data = await authAPI.adminRegister(payload);
-
-      console.log('Admin registration response:', data);
-
+      const data = await adminRegister(payload);
       if (data.success) {
-        setServerMessage({
-          type: 'success',
-          text: 'Admin account created successfully! Redirecting to login...'
-        });
-
-        // Redirect to admin login page after successful registration
-        setTimeout(() => {
-          navigate('/admin/signin', {
-            state: {
-              message: 'Admin account created successfully! Please login to continue.',
-              email: formData.email
-            }
-          });
-        }, 2000);
+        setServerMessage({ type: 'success', text: 'Admin account created! Redirecting...' });
+        setTimeout(() => navigate('/admin/signin', { state: { email: formData.email } }), 2000);
       } else {
-        setServerMessage({
-          type: 'error',
-          text: data.message || 'Admin registration failed. Please try again.'
-        });
+        setServerMessage({ type: 'error', text: data.message || 'Registration failed.' });
       }
-
     } catch (error) {
-      console.error('Admin registration error:', error);
-
-      let errorMessage = 'Admin registration failed. Please try again.';
-
-      if (error.data) {
-        // Handle enhanced error from apiRequest
-        const serverError = error.data;
-        console.log('Server error response:', serverError);
-
-        if (serverError.detail) {
-          errorMessage = serverError.detail;
-        } else if (serverError.message) {
-          errorMessage = serverError.message;
-        } else if (typeof serverError === 'string') {
-          errorMessage = serverError;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      setServerMessage({
-        type: 'error',
-        text: errorMessage
-      });
+      setServerMessage({ type: 'error', text: error.data?.detail || error.message || 'Registration failed.' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
-  const handleClickShowSecretKey = () => setShowSecretKey(!showSecretKey);
-
-  // Helper function to display server messages
-  const renderServerMessage = () => {
-    if (!serverMessage) return null;
-
-    return (
-      <Alert
-        severity={serverMessage.type}
-        sx={{
-          mb: 3,
-          borderRadius: 2,
-          boxShadow: 1
-        }}
-      >
-        {serverMessage.text}
-      </Alert>
-    );
-  };
-
   return (
-    <>
+    <PageWrapper>
       <CssBaseline />
-      <Box sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-        overflow: 'hidden',
-        '&::-webkit-scrollbar': {
-          display: 'none'
-        },
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none'
-      }}>
-        <Grid container justifyContent="center" sx={{ overflow: 'hidden' }}>
-          <Grid item xs={12} sm={8} md={6} lg={4} sx={{ overflow: 'hidden' }}>
-            <Paper elevation={6} sx={{
-              p: 4,
-              borderRadius: 4,
-              boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)',
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              transform: 'translateY(0)',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-5px)',
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)'
-              },
-              overflow: 'hidden'
-            }}>
-              <Box textAlign="center" mb={3}>
-                <HowToRegOutlinedIcon color="primary" sx={{
-                  fontSize: 50,
-                  background: 'linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }} />
-                <Typography variant="h4" component="h1" gutterBottom sx={{
-                  fontWeight: 700,
-                  color: 'text.primary',
-                  mt: 1
-                }}>
-                  Admin Registration
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Create your LegalAI Administrator Account
-                </Typography>
-              </Box>
-
-              {renderServerMessage()}
-
-              <Box
-                component="form"
-                onSubmit={handleSubmit}
-                sx={{ mt: 2 }}
-                noValidate
+      <Container maxWidth="sm" sx={{ display: 'flex', justifyContent: 'center', zIndex: 1 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <StyledPaper elevation={0}>
+            <Box sx={{ mb: 4, textAlign: 'center' }}>
+              <IconButton
+                component={Link}
+                to="/"
+                sx={{
+                  position: 'absolute',
+                  top: 24,
+                  left: 24,
+                  color: 'rgba(255,255,255,0.4)',
+                  '&:hover': { color: 'white', background: 'rgba(255,255,255,0.05)' }
+                }}
               >
-                <TextField
-                  label="Full Name"
-                  name="name"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  value={formData.name}
-                  onChange={handleChange}
-                  error={!!errors.name}
-                  helperText={errors.name}
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '& fieldset': {
-                        borderColor: 'rgba(0, 0, 0, 0.1)'
-                      },
-                      '&:hover fieldset': {
-                        borderColor: 'primary.main'
-                      }
-                    }
-                  }}
-                />
+                <ArrowBackIcon />
+              </IconButton>
 
-                <TextField
-                  label="Email Address"
-                  name="email"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={!!errors.email}
-                  helperText={errors.email}
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
-                  placeholder="admin@legalai.com"
-                />
-
-                <TextField
-                  label="Password"
-                  name="password"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={!!errors.password}
-                  helperText={errors.password || 'Minimum 8 characters with uppercase, lowercase, number, and special character'}
-                  required
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={handleClickShowPassword}
-                          edge="end"
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
-                />
-
-                <TextField
-                  label="Confirm Password"
-                  name="confirmPassword"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  error={!!errors.confirmPassword}
-                  helperText={errors.confirmPassword}
-                  required
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle confirm password visibility"
-                          onClick={handleClickShowConfirmPassword}
-                          edge="end"
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
-                />
-
-                <TextField
-                  label="Admin Secret Key"
-                  name="secret_key"
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  type={showSecretKey ? "text" : "password"}
-                  value={formData.secret_key}
-                  onChange={handleChange}
-                  error={!!errors.secret_key}
-                  helperText={errors.secret_key || 'Enter the admin authorization key'}
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SecurityIcon color="action" />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle secret key visibility"
-                          onClick={handleClickShowSecretKey}
-                          edge="end"
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          {showSecretKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
-                />
-
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  disabled={loading}
-                  sx={{
-                    mt: 3,
-                    mb: 2,
-                    py: 1.5,
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    letterSpacing: 0.5,
-                    background: 'linear-gradient(45deg, #3f51b5 30%, #2196f3 90%)',
-                    boxShadow: '0 3px 5px 2px rgba(33, 150, 243, 0.1)',
-                    '&:hover': {
-                      boxShadow: '0 5px 10px 2px rgba(33, 150, 243, 0.2)'
-                    },
-                    '&:disabled': {
-                      background: 'grey.300'
-                    }
-                  }}
-                >
-                  {loading ? 'Creating Admin Account...' : 'Create Admin Account'}
-                </Button>
+              <Box sx={{
+                display: 'inline-flex',
+                p: 1.5,
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))',
+                mb: 2,
+                border: '1px solid rgba(59, 130, 246, 0.2)'
+              }}>
+                <HowToRegOutlinedIcon sx={{ fontSize: 32, color: '#3b82f6' }} />
               </Box>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', mb: 1, letterSpacing: '-0.5px' }}>
+                Admin Registration
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 400 }}>
+                Create a new administrator account
+              </Typography>
+            </Box>
 
-              <Box textAlign="center" sx={{ mt: 3 }}>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  Already have an admin account?{' '}
-                  <Link
-                    to="/admin/signin"
-                    style={{
-                      color: '#3f51b5',
-                      textDecoration: 'none',
-                      fontWeight: 600
-                    }}
-                    onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                    onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                  >
-                    Sign In
-                  </Link>
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
-                  <SecurityIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-                  Administrator access requires proper authorization and verification.
-                </Typography>
-                <Button
-                  component={Link}
-                  to="/"
-                  sx={{
-                    mt: 2,
-                    color: 'text.secondary',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                    '&:hover': {
-                      color: 'primary.main',
-                      backgroundColor: 'rgba(63, 81, 181, 0.04)'
-                    }
-                  }}
-                >
-                  Back to Main Site
-                </Button>
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
-    </>
+            {serverMessage && (
+              <Alert
+                severity={serverMessage.type}
+                sx={{ mb: 3, borderRadius: '12px', background: alpha(serverMessage.type === 'success' ? '#10b981' : '#ef4444', 0.1), color: serverMessage.type === 'success' ? '#10b981' : '#ef4444', border: `1px solid ${alpha(serverMessage.type === 'success' ? '#10b981' : '#ef4444', 0.2)}` }}
+              >
+                {serverMessage.text}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} noValidate>
+              <StyledTextField fullWidth label="Full Name" name="name" value={formData.name} onChange={handleChange} error={!!errors.name} helperText={errors.name} />
+              <StyledTextField fullWidth label="Admin Email" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email} />
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    fullWidth label="Password" name="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password}
+                    InputProps={{ endAdornment: (<InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.3)' }}>{showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton></InputAdornment>) }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    fullWidth label="Confirm" name="confirmPassword" type={showConfirmPassword ? "text" : "password"} value={formData.confirmPassword} onChange={handleChange} error={!!errors.confirmPassword} helperText={errors.confirmPassword}
+                    InputProps={{ endAdornment: (<InputAdornment position="end"><IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" sx={{ color: 'rgba(255,255,255,0.3)' }}>{showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton></InputAdornment>) }}
+                  />
+                </Grid>
+              </Grid>
+
+              <StyledTextField
+                fullWidth
+                label="Admin Secret Key"
+                name="secret_key"
+                type={showSecretKey ? "text" : "password"}
+                value={formData.secret_key}
+                onChange={handleChange}
+                error={!!errors.secret_key}
+                helperText={errors.secret_key}
+                InputProps={{
+                  startAdornment: (<InputAdornment position="start"><SecurityIcon sx={{ color: 'rgba(255,255,255,0.3)' }} /></InputAdornment>),
+                  endAdornment: (<InputAdornment position="end"><IconButton onClick={() => setShowSecretKey(!showSecretKey)} edge="end" sx={{ color: 'rgba(255,255,255,0.3)' }}>{showSecretKey ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton></InputAdornment>)
+                }}
+              />
+
+              <GradientButton type="submit" fullWidth disabled={loading}>
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Admin Account'}
+              </GradientButton>
+            </Box>
+
+            <Box sx={{ textAlign: 'center', mt: 4 }}>
+              <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', mb: 2 }}>
+                Already have an admin account?{' '}
+                <Link to="/admin/signin" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 700 }}>
+                  Sign In
+                </Link>
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <SecurityIcon sx={{ fontSize: 16, mr: 0.5 }} /> Authorized Personnel Only
+              </Typography>
+            </Box>
+          </StyledPaper>
+        </motion.div>
+      </Container>
+    </PageWrapper>
   );
 };
 

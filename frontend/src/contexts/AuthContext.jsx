@@ -1,8 +1,16 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI as api } from '../services/api';
 
 const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -54,15 +62,41 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const adminLogin = async (credentials) => {
+    const data = await api.adminLogin(credentials);
+    if (data.success && data.data?.access_token) {
+      localStorage.setItem('authToken', data.data.access_token);
+      localStorage.setItem('adminUser', JSON.stringify(data.data.admin));
+      setUser(data.data.admin);
+      navigate('/admin/dashboard');
+    }
+    return data;
+  };
+
+  const adminRegister = async (adminData) => {
+    const data = await api.adminRegister(adminData);
+    if (data.success) {
+      // Logic from AdminSignup.jsx - usually doesn't auto-login unless token is returned
+      if (data.data?.access_token) {
+        localStorage.setItem('authToken', data.data.access_token);
+        localStorage.setItem('adminUser', JSON.stringify(data.data.admin));
+        setUser(data.data.admin);
+        navigate('/admin/dashboard');
+      }
+    }
+    return data;
+  };
+
   const logout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('adminUser');
     setUser(null);
     navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, adminLogin, adminRegister, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -182,13 +182,7 @@ const About = () => {
     { year: '2025 →', title: 'Multilingual & Global Expansion', body: 'Expanding to international legal systems including UK, EU, and US law. Arabic and Urdu language support planned. Mobile app coming soon.', done: false },
   ];
 
-  const milestones = [
-    { icon: <Award size={20} />, text: 'Featured in PakistanTech Digest as a top AI startup' },
-    { icon: <TrendingUp size={20} />, text: '2023 University Innovation Award finalist' },
-    { icon: <HeartHandshake size={20} />, text: '500+ active users within 6 months of launch' },
-    { icon: <BookOpen size={20} />, text: 'Adopted by 3 law schools for legal research training' },
-    { icon: <Globe size={20} />, text: 'Partnership discussions ongoing with 2 Lahore-based law firms' },
-  ];
+
 
   const fadeUpVariant = {
     hidden: { opacity: 0, y: 40 },
@@ -354,7 +348,7 @@ const About = () => {
                 Born from a Frustration with <span style={{ color: '#3b82f6' }}>Inaccessible Law</span>
               </Typography>
               <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.7)', mb: 3 }}>
-                In 2022, three Computer Science students at a Lahore university
+                We are the students of University Of Management & Technology who
                 witnessed firsthand how ordinary people — laborers, small business
                 owners, students — were being exploited simply because they couldn't
                 afford legal counsel or understand legal documents in front of them.
@@ -378,21 +372,11 @@ const About = () => {
 
           <Grid item xs={12} md={6}>
             <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
-              {/* Achievement Milestones */}
               <Box sx={{ p: 4, borderRadius: '24px', border: `1px solid ${alpha('#3b82f6', 0.2)}`, background: alpha('#1e293b', 0.5), backdropFilter: 'blur(12px)', color: '#f8fafc' }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, display: 'flex', alignItems: 'center', gap: 1.5, color: 'white' }}>
-                  <Box sx={{ p: 0.75, borderRadius: '8px', background: alpha('#3b82f6', 0.15), color: '#3b82f6' }}><Award size={18} /></Box>
-                  Key Milestones
+                  <Box sx={{ p: 0.75, borderRadius: '8px', background: alpha('#3b82f6', 0.15), color: '#3b82f6' }}><Target size={18} /></Box>
+                  Our Reach
                 </Typography>
-                <List dense>
-                  {milestones.map((m, i) => (
-                    <ListItem key={i} sx={{ px: 0, py: 1, alignItems: 'flex-start' }}>
-                      <ListItemIcon sx={{ mt: 0.25, minWidth: 36, color: theme.palette.primary.main }}>{m.icon}</ListItemIcon>
-                      <ListItemText primary={<Typography variant="body2" sx={{ lineHeight: 1.6 }}>{m.text}</Typography>} />
-                    </ListItem>
-                  ))}
-                </List>
-                <Divider sx={{ my: 3 }} />
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   {[
                     { label: 'Team Size', value: '3 Core Members' },

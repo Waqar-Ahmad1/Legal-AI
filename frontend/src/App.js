@@ -4,6 +4,9 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 import AdminSignup from "./pages/admin/Auth/AdminSignup";
 import AdminSignin from "./pages/admin/Auth/AdminSignin";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
@@ -11,6 +14,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import Overview from "./pages/admin/Overview";
 import Training from "./pages/admin/Training";
 import Users from "./pages/admin/Users";
+import AdminSupport from "./pages/admin/Support";
 import Audit from "./pages/admin/Audit";
 import Settings from "./pages/admin/Settings";
 import About from "./pages/About";
@@ -32,7 +36,7 @@ function Layout({ children }) {
     const path = location.pathname;
 
     // Hide for auth pages or try-it
-    if (["/login", "/register", "/try-it"].includes(path)) {
+    if (["/login", "/register", "/try-it", "/verify-email", "/forgot-password", "/reset-password"].includes(path)) {
       return true;
     }
 
@@ -75,6 +79,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/about" element={<About />} />
         <Route path="/try-it" element={<TryItNow />} />
 
@@ -93,15 +100,19 @@ function App() {
         <Route path="/admin/signup" element={<AdminSignup />} />
         <Route path="/admin/signin" element={<AdminSignin />} />
 
-        {/* Admin Routes (Protection removed for development) */}
         <Route
           path="/admin"
-          element={<AdminLayout />}
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout />
+            </ProtectedAdminRoute>
+          }
         >
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview" element={<Overview />} />
           <Route path="training" element={<Training />} />
           <Route path="users" element={<Users />} />
+          <Route path="support" element={<AdminSupport />} />
           <Route path="audit" element={<Audit />} />
           <Route path="settings" element={<Settings />} />
           <Route path="dashboard" element={<Navigate to="/admin/overview" replace />} />

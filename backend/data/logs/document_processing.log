@@ -4594,3 +4594,450 @@ pymongo.errors.NetworkTimeout: SSL handshake failed: ac-ufdqkcn-shard-00-00.oydl
 2025-10-13 14:37:30,452 - app.config - WARNING - ⚠️ Gemini API quota exceeded - using fallback providers
 2025-10-13 14:37:30,485 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
 2025-10-13 14:37:30,523 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-20 22:47:21,551 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-20 22:47:21,553 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-20 22:47:55,390 - google_genai._api_client - WARNING - Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+2026-02-20 22:48:09,825 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/embedding-001:batchEmbedContents "HTTP/1.1 404 Not Found"
+2026-02-20 22:48:12,475 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-20 22:48:12,475 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-20 22:48:17,495 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-20 22:48:17,496 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-20 22:48:17,496 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-20 22:48:23,039 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-20 22:48:23,040 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-20 22:48:35,296 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-20 22:48:35,612 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-20 22:48:35,612 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-20 22:48:35,614 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-20 22:48:35,633 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-20 22:48:35,653 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-20 22:49:38,271 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-20 22:49:38,275 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-20 22:49:56,458 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-20 22:49:56,458 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-20 22:50:00,767 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-20 22:50:00,769 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-20 22:50:00,770 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-20 22:50:07,004 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-20 22:50:07,004 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-20 22:50:16,370 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-20 22:50:16,730 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-20 22:50:16,730 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-20 22:50:16,730 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-20 22:50:16,750 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-20 22:50:16,766 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-20 23:07:51,381 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-20 23:07:51,382 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-20 23:07:55,037 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-20 23:07:55,039 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-20 23:08:00,786 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-20 23:08:00,789 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-20 23:08:00,790 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-20 23:08:03,076 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-20 23:08:03,077 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-20 23:08:16,329 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-20 23:08:16,815 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-20 23:08:16,817 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-20 23:08:16,817 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-20 23:08:16,848 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-20 23:08:16,887 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 08:21:21,830 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1015, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 480, in _configured_socket_interface
+    sock = _create_connection(address, options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 385, in _create_connection
+    for res in socket.getaddrinfo(host, port, family=family, type=socket.SOCK_STREAM):  # type: ignore[attr-defined, unused-ignore]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1038, in connect
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 148, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: ac-ufdqkcn-shard-00-02.oydlhwg.mongodb.net:27017: [Errno 11001] getaddrinfo failed (configured timeouts: socketTimeoutMS: 30000.0ms, connectTimeoutMS: 10000.0ms)
+2026-02-21 08:21:35,131 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1015, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 480, in _configured_socket_interface
+    sock = _create_connection(address, options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 385, in _create_connection
+    for res in socket.getaddrinfo(host, port, family=family, type=socket.SOCK_STREAM):  # type: ignore[attr-defined, unused-ignore]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1038, in connect
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 148, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: ac-ufdqkcn-shard-00-01.oydlhwg.mongodb.net:27017: [Errno 11001] getaddrinfo failed (configured timeouts: socketTimeoutMS: 30000.0ms, connectTimeoutMS: 10000.0ms)
+2026-02-21 08:23:51,934 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1015, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 480, in _configured_socket_interface
+    sock = _create_connection(address, options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 385, in _create_connection
+    for res in socket.getaddrinfo(host, port, family=family, type=socket.SOCK_STREAM):  # type: ignore[attr-defined, unused-ignore]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1038, in connect
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 148, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: ac-ufdqkcn-shard-00-02.oydlhwg.mongodb.net:27017: [Errno 11001] getaddrinfo failed (configured timeouts: socketTimeoutMS: 30000.0ms, connectTimeoutMS: 10000.0ms)
+2026-02-21 08:57:59,756 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 08:57:59,757 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 08:58:10,240 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 08:58:10,243 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 08:58:16,542 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 08:58:16,545 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 08:58:16,545 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 08:58:18,938 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 08:58:18,941 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 08:58:42,114 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 08:58:42,502 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 08:58:42,505 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 08:58:42,515 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 08:58:42,617 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 08:58:42,764 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 09:00:28,785 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 09:00:28,785 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 09:00:36,040 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 09:00:36,042 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 09:00:41,866 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 09:00:41,871 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 09:00:41,872 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 09:00:44,740 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 09:00:44,742 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 09:01:01,093 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 09:01:01,400 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 09:01:01,401 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 09:01:01,407 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 09:01:01,435 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 09:01:01,464 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 09:01:54,258 - app.routes - INFO - 🔐 REGISTER endpoint called for: waqarahmadisbest@gmail.com
+2026-02-21 09:01:56,929 - app.routes - WARNING - ❌ Email already registered: waqarahmadisbest@gmail.com
+2026-02-21 09:02:21,502 - app.routes - INFO - 🔐 REGISTER endpoint called for: waqarahmadisbes@gmail.com
+2026-02-21 09:02:25,700 - app.routes - INFO - ✅ User registered successfully: waqarahmadisbes@gmail.com (ID: 6999e520e978c0c69d9c6ff4)
+2026-02-21 09:02:53,267 - app.routes - INFO - 🔐 LOGIN attempt for: waqarahmadisbes@gmail.com
+2026-02-21 09:02:57,864 - app.routes - INFO - ✅ User logged in successfully: waqarahmadisbes@gmail.com
+2026-02-21 09:40:16,170 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 09:40:16,172 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 09:40:22,585 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 09:40:22,586 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 09:40:29,946 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 09:40:29,948 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 09:40:29,949 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 09:40:32,297 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 09:40:32,300 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 09:40:48,640 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 09:40:49,014 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 09:40:49,028 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 09:40:49,029 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 09:40:49,119 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 09:40:49,177 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 09:46:07,078 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 09:46:07,080 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 09:46:13,637 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 09:47:57,389 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 09:48:04,390 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 09:48:04,394 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 09:48:04,395 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 09:48:06,643 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 09:48:06,646 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 09:48:23,900 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 09:48:24,329 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 09:48:24,329 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 09:48:24,330 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 09:48:24,440 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 09:48:24,484 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 09:57:14,095 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 09:57:14,096 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 09:57:24,873 - app.config - WARNING - Ollama connection test failed: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/tags (Caused by NewConnectionError("HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-02-21 09:57:24,874 - app.config - WARNING - Ollama connection test failed - is Ollama running?
+2026-02-21 09:57:24,884 - app.config - WARNING - ⚠️ Using fake embeddings - no valid embedder available
+2026-02-21 09:57:29,122 - app.config - WARNING - Ollama connection test failed: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/tags (Caused by NewConnectionError("HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+2026-02-21 09:57:29,123 - app.config - WARNING - Ollama connection test failed for LLM
+2026-02-21 09:57:29,124 - app.config - WARNING - ⚠️ No valid LLM available - text generation will fail
+2026-02-21 09:57:29,125 - app.config - INFO - 🤖 AI Providers: Embeddings=fake, LLM=none
+2026-02-21 09:57:29,165 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 09:57:29,233 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 09:57:58,229 - app.routes - INFO - 🔐 REGISTER endpoint called for: waqarrahmad.se@gmail.com
+2026-02-21 09:58:05,702 - app.email_utils - INFO - ✅ Real verification email sent to: waqarrahmad.se@gmail.com
+2026-02-21 09:58:05,702 - app.routes - INFO - ✅ User registered (pending verification): waqarrahmad.se@gmail.com
+2026-02-21 09:58:52,874 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 09:58:53,429 - app.routes - WARNING - ❌ Login blocked - email not verified: waqarrahmad.se@gmail.com
+2026-02-21 10:01:16,652 - app.routes - INFO - 🔐 REGISTER endpoint called for: f2021065018@gmail.com
+2026-02-21 10:01:16,723 - app.routes - WARNING - ❌ Email already registered: f2021065018@gmail.com
+2026-02-21 10:01:55,533 - app.routes - INFO - 🔐 REGISTER endpoint called for: waqarrahmad.se@gmail.com
+2026-02-21 10:01:55,603 - app.routes - WARNING - ❌ Email already registered: waqarrahmad.se@gmail.com
+2026-02-21 10:02:07,459 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 10:02:08,610 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 10:15:00,142 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 10:15:00,143 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 10:15:06,093 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 10:15:06,094 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 10:15:15,779 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 10:15:15,785 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 10:15:15,786 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 10:15:18,588 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 10:15:18,591 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 10:15:50,982 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 10:15:51,321 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 10:15:51,323 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 10:15:51,327 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 10:15:51,530 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 10:15:51,667 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 10:17:19,578 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 10:17:19,583 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 10:17:26,213 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 10:17:26,215 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 10:17:33,511 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 10:17:33,518 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 10:17:33,521 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 10:17:36,566 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 10:17:36,570 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 10:18:01,995 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 10:18:02,400 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 10:18:02,400 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 10:18:02,403 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 10:18:02,449 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 10:18:02,494 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 10:23:03,068 - app.email_utils - INFO - ✅ Password reset email sent to: waqarrahmad.se@gmail.com
+2026-02-21 10:23:55,587 - app.routes - INFO - ✅ Password reset success for user: waqarrahmad.se@gmail.com
+2026-02-21 10:24:39,220 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 10:24:39,647 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 10:26:32,737 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 10:26:33,122 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 10:33:15,278 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 10:33:15,695 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 10:33:43,720 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 10:33:44,095 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 10:39:30,539 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 10:39:30,543 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 10:39:34,088 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 10:39:34,088 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 10:39:38,289 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 10:39:38,289 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 10:39:38,289 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 10:39:40,695 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 10:39:40,695 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 10:39:53,340 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 10:39:53,792 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 10:39:53,793 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 10:39:53,805 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 10:39:53,932 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 10:39:53,959 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 10:39:54,014 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 10:39:54,423 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 10:48:44,988 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 10:48:45,377 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 10:52:04,449 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 10:52:04,471 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 10:52:08,065 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 10:52:51,631 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 10:57:42,432 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 10:57:42,901 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 11:04:34,155 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 11:04:34,693 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 11:05:09,022 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:05:09,073 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:05:12,557 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 11:05:53,327 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 11:07:13,454 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:07:13,481 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:07:16,887 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 11:07:58,633 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 11:20:16,128 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 11:20:16,128 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 11:20:21,625 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 11:20:21,628 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 11:20:29,378 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 11:20:29,379 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 11:20:29,380 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 11:20:31,721 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 11:20:31,723 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 11:20:54,554 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 11:20:55,087 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 11:20:55,096 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 11:20:55,097 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 11:20:55,579 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:20:55,742 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:24:26,180 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 11:24:26,368 - app.routes - WARNING - ❌ Admin login failed - admin not found: waqarrahmad.se@gmail.com
+2026-02-21 11:24:33,451 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarahmadisbest@gmail.com
+2026-02-21 11:24:33,565 - app.routes - ERROR - Password verification failed: Invalid salt
+2026-02-21 11:24:33,566 - app.routes - WARNING - ❌ Admin login failed - incorrect password for: waqarahmadisbest@gmail.com
+2026-02-21 11:26:02,318 - app.routes - INFO - 👑 ADMIN SIGNUP attempt for: waqarahmadisbest@gmail.com
+2026-02-21 11:26:02,446 - app.routes - WARNING - ❌ Email already registered as admin: waqarahmadisbest@gmail.com
+2026-02-21 11:26:24,761 - app.routes - INFO - 👑 ADMIN SIGNUP attempt for: waqarrahmad.se@gmail.com
+2026-02-21 11:26:25,562 - app.routes - INFO - ✅ Admin registered successfully: waqarrahmad.se@gmail.com
+2026-02-21 11:26:31,680 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 11:26:32,612 - app.routes - INFO - ✅ Admin logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 11:26:33,498 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:26:33,635 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:26:34,390 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:26:34,418 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:38:17,773 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 11:38:17,798 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 11:38:25,869 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 11:38:27,216 - app.routes - INFO - ✅ Admin logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 11:38:28,296 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:38:28,427 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:38:28,797 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:38:28,853 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:43:44,344 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:43:44,420 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:55:01,187 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 11:55:01,187 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 11:55:07,224 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 11:55:07,228 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 11:55:13,377 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 11:55:13,379 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 11:55:13,380 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 11:55:15,632 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 11:55:15,636 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 11:55:42,513 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 11:55:42,852 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 11:55:42,878 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 11:55:42,901 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 11:55:42,985 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:55:43,062 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:57:21,654 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 11:57:21,655 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 11:57:26,674 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 11:57:26,674 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 11:57:34,858 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 11:57:34,869 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 11:57:34,870 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 11:57:37,196 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 11:57:37,197 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 11:57:56,908 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 11:57:57,240 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 11:57:57,243 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 11:57:57,243 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 11:57:57,284 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:57:57,330 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:57:57,573 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 11:57:57,584 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 11:59:36,810 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 11:59:38,100 - app.routes - INFO - ✅ Admin logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 11:59:39,463 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:59:39,578 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 11:59:40,086 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 11:59:40,125 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 12:01:09,306 - root - ERROR - Unexpected error: name 'secrets' is not defined
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 162, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\starlette\middleware\cors.py", line 91, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\starlette\middleware\cors.py", line 146, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 79, in __call__
+    raise exc
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 20, in __call__
+    raise e
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\starlette\routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\starlette\routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\fastapi\routing.py", line 264, in app
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\fastapi\dependencies\utils.py", line 620, in solve_dependencies
+    ) = await request_body_to_args(  # body_params checked above
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\fastapi\dependencies\utils.py", line 750, in request_body_to_args
+    v_, errors_ = field.validate(value, values, loc=loc)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\fastapi\_compat.py", line 125, in validate
+    self._type_adapter.validate_python(value, from_attributes=True),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pydantic\type_adapter.py", line 441, in validate_python
+    return self.validator.validate_python(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\.gemini\antigravity\scratch\Legal AI\backend\app\models.py", line 111, in <lambda>
+    ticket_ref: str = Field(default_factory=lambda: secrets.token_hex(4).upper())
+                                                    ^^^^^^^
+NameError: name 'secrets' is not defined. Did you forget to import 'secrets'
+2026-02-21 12:23:29,621 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 12:23:29,622 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 12:23:34,555 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 12:23:34,556 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 12:23:41,747 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 12:23:41,753 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 12:23:41,754 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 12:23:43,998 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 12:23:43,999 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 12:24:08,012 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 12:24:08,180 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 12:24:08,188 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 12:24:08,193 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 12:24:08,543 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 12:24:08,752 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 12:27:00,736 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 12:27:00,760 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 12:30:17,497 - app.routes - INFO - 🎫 New support ticket created: F2E26285
+2026-02-21 12:30:34,920 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 12:30:36,305 - app.routes - INFO - ✅ Admin logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 12:30:37,379 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 12:30:37,466 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 12:30:38,012 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 12:30:38,087 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
