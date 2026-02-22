@@ -1,4 +1,4 @@
-# main.py - UPDATED ENDPOINTS VERSION
+# main.py - LegalAI Backend Entry Point
 import os
 import logging
 import uvicorn
@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
 import json
 
 # Fix OpenMP DLL conflict - MUST BE AT THE VERY TOP
@@ -39,22 +40,66 @@ LOG_DIR = Path("data/logs")
 
 # API Constants
 API_KEY_NAME = "X-API-Key"
-ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "PLERkcJ-bJNQDJFGVxpBiNTGb0puWQRgq0USeoWLciQ")
+ADMIN_API_KEY = os.getenv("ADMIN_API_KEY")
+if not ADMIN_API_KEY:
+    logging.warning("⚠️ ADMIN_API_KEY not set in environment. Admin upload endpoint will be disabled.")
 
 # ========================
-# FastAPI Application
+# Application Lifespan
+# ========================
+
+@asynccontextmanager
+async def lifespan(app):
+    """Application startup and shutdown lifecycle"""
+    # Startup
+    try:
+        logging.info("🔧 Initializing LegalAI System...")
+        
+        db_status = "connected" if is_database_connected() else "disconnected"
+        logging.info(f"✅ Database status: {db_status}")
+        
+        try:
+            from app.config import ai_provider
+            provider_info = ai_provider.get_provider_info()
+            logging.info(f"✅ Embeddings: {provider_info['embeddings']['type']}")
+            logging.info(f"✅ LLM: {provider_info['llm']['type']}")
+        except Exception as e:
+            logging.warning(f"⚠️  AI Providers: {e}")
+        
+        try:
+            from app.config import load_vector_store
+            store = load_vector_store()
+            doc_count = len(store.index_to_docstore_id)
+            logging.info(f"✅ Vector store: {doc_count} documents")
+        except Exception as e:
+            logging.warning(f"⚠️  Vector store: {e}")
+        
+        logging.info("✅ LegalAI System started successfully")
+        
+    except Exception as e:
+        logging.error(f"❌ Startup error: {e}")
+    
+    yield  # Application is running
+    
+    # Shutdown
+    logging.info("🔧 LegalAI System shutting down...")
+
+# ========================
+# FastAPI Application (single instance)
 # ========================
 
 app = FastAPI(
     title="LegalAI API",
     description="Backend API for LegalAI application",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS Middleware
+origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,7 +110,7 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
 # Include API router WITHOUT prefix to match frontend routes
-app.include_router(api_router)  # No prefix  # Removed prefix="/api/v1"
+app.include_router(api_router)
 
 # ========================
 # API Key Authentication (ONLY for legacy endpoints)
@@ -75,10 +120,10 @@ api_key_scheme = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 async def validate_api_key(api_key: str = Depends(api_key_scheme)):
     """Validate admin API key - ONLY for specific endpoints that need it"""
-    if not api_key:
+    if not api_key or not ADMIN_API_KEY:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="API Key is missing. Please include X-API-Key header."
+            detail="API Key is missing or not configured. Please include X-API-Key header."
         )
     
     if api_key != ADMIN_API_KEY:
@@ -225,53 +270,7 @@ async def admin_upload(
             }
         )
 
-# All other endpoints are handled by app.routes.api_router included on line 67
-
-
-# ========================
-# Startup Event
-# ========================
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize using all modules"""
-    try:
-        print("🔧 Initializing LegalAI System...")
-        
-        db_status = "connected" if is_database_connected() else "disconnected"
-        print(f"✅ Database status: {db_status}")
-        
-        # Check AI provider status
-        try:
-            from app.config import ai_provider
-            provider_info = ai_provider.get_provider_info()
-            print(f"✅ Embeddings: {provider_info['embeddings']['type']}")
-            print(f"✅ LLM: {provider_info['llm']['type']}")
-            print(f"✅ Fallback mode: {provider_info['fallback_mode']}")
-            print(f"💡 Recommendation: {provider_info['recommendation']}")
-        except Exception as e:
-            print(f"⚠️  AI Providers: {e}")
-        
-        try:
-            from app.config import load_vector_store
-            store = load_vector_store()
-            doc_count = len(store.index_to_docstore_id)
-            print(f"✅ Vector store: {doc_count} documents")
-        except Exception as e:
-            print(f"⚠️  Vector store: {e}")
-        
-        print("✅ LegalAI System started successfully")
-        print("📋 Available endpoints:")
-        print("   POST /register - User registration")
-        print("   POST /login - User login")
-        print("   POST /admin/signup - Admin registration")
-        print("   POST /admin/signin - Admin login")
-        print("   POST /chat - Chat with documents")
-        print("   POST /admin/upload - Upload documents")
-        print("   GET /system/status - System status")
-        
-    except Exception as e:
-        print(f"❌ Startup error: {e}")
+# All other endpoints are handled by app.routes.api_router
 
 # ========================
 # Server Startup

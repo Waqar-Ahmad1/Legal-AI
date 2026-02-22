@@ -6,6 +6,7 @@ const apiRequest = async (endpoint, options = {}) => {
   const token = localStorage.getItem('authToken');
   const config = {
     method: options.method || 'GET',
+    credentials: 'include', // HttpOnly Cookie support
     headers: {
       ...options.headers,
     },
@@ -114,29 +115,55 @@ export const chatAPI = {
     });
   },
 
-  // Stream chat message (for real-time responses)
-  streamMessage: async (message, onChunk) => {
-    try {
-      const response = await chatAPI.sendMessage(message);
+  // Stream chat message (for professional real-time responses)
+  streamMessage: async (query, onMetadata, onChunk, onDone) => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE_URL}/chat`, {
+      method: 'POST',
+      credentials: 'include', // HttpOnly Cookie support
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ query, stream: true })
+    });
 
-      if (response.success && response.data && onChunk) {
-        // Simulate streaming by breaking response into chunks
-        const answer = response.data.answer;
-        const words = answer.split(' ');
-        let currentText = '';
+    if (!response.ok) {
+      throw new Error(`Streaming failed: ${response.statusText}`);
+    }
 
-        for (let i = 0; i < words.length; i++) {
-          currentText += words[i] + ' ';
-          onChunk(currentText.trim());
-          // Add delay to simulate real streaming
-          await new Promise(resolve => setTimeout(resolve, 30));
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // Keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.replace('data: ', '').trim();
+          if (dataStr === '[DONE]') {
+            if (onDone) onDone();
+            continue;
+          }
+
+          try {
+            const data = JSON.parse(dataStr);
+            if (data.type === 'metadata' && onMetadata) {
+              onMetadata(data);
+            } else if (data.type === 'content' && onChunk) {
+              onChunk(data.delta);
+            }
+          } catch (e) {
+            console.error('Error parsing SSE chunk:', e);
+          }
         }
       }
-
-      return response;
-    } catch (error) {
-      console.error('Stream chat error:', error);
-      throw error;
     }
   },
 
@@ -299,55 +326,65 @@ export const adminAPI = {
       method: 'PATCH',
       body: settingsData
     });
+  },
+
+  // Security Operations
+  rotateSecretKey: async () => {
+    return await apiRequest('/admin/security/rotate-key', {
+      method: 'POST'
+    });
+  },
+
+  revokeAllSessions: async () => {
+    return await apiRequest('/admin/security/revoke-sessions', {
+      method: 'POST'
+    });
   }
 };
 
 // ========================
-// Conversation API Functions
+// Conversation API Functions - PERSISTED VERSION
 // ========================
 
 export const saveConversation = async (userId, conversation) => {
   try {
-    console.log('Saving conversation for user:', userId);
-
-    // For now, store in localStorage since backend doesn't have conversation endpoints
+    console.log('Saving conversation to backend:', userId);
+    return await apiRequest('/conversations', {
+      method: 'POST',
+      body: {
+        id: conversation.id && conversation.id.length > 15 ? conversation.id : null,
+        title: conversation.title || 'New Conversation',
+        messages: conversation.messages
+      }
+    });
+  } catch (error) {
+    console.error('Failed to save conversation to backend:', error);
+    // Fallback to localStorage for guest/offline
     const key = `conversations_${userId}`;
     const conversations = JSON.parse(localStorage.getItem(key) || '[]');
-    const newConversation = {
-      ...conversation,
-      id: Date.now().toString(),
-      userId: userId,
-      savedAt: new Date().toISOString()
-    };
-
-    conversations.push(newConversation);
+    const newConversation = { ...conversation, id: conversation.id || Date.now().toString(), savedAt: new Date().toISOString() };
+    const index = conversations.findIndex(c => c.id === newConversation.id);
+    if (index > -1) conversations[index] = newConversation;
+    else conversations.push(newConversation);
     localStorage.setItem(key, JSON.stringify(conversations));
-
-    return {
-      success: true,
-      data: newConversation
-    };
-  } catch (error) {
-    console.error('Failed to save conversation:', error);
-    throw error;
+    return { success: true, data: newConversation, fallback: true };
   }
 };
 
 export const getConversations = async (userId) => {
   try {
-    console.log('Fetching conversations for user:', userId);
-
-    // Get from localStorage
+    console.log('Fetching conversations from backend:', userId);
+    const response = await apiRequest('/conversations');
+    if (response.success) {
+      // Merge with any local ones if needed, but primary is backend
+      return response;
+    }
+    throw new Error('Backend fetch failed');
+  } catch (error) {
+    console.error('Failed to fetch conversations from backend:', error);
     const key = `conversations_${userId}`;
     const conversations = JSON.parse(localStorage.getItem(key) || '[]');
-
-    return {
-      success: true,
-      data: conversations
-    };
-  } catch (error) {
-    console.error('Failed to fetch conversations:', error);
-    throw error;
+    return { success: true, data: conversations, fallback: true };
   }
 };
 
@@ -424,62 +461,6 @@ export const healthAPI = {
   }
 };
 
-// ========================
-// Debug Utilities
-// ========================
-
-export const debugAPI = {
-  // Test chat endpoint with different payload formats
-  testChatFormats: async () => {
-    const tests = [
-      { name: 'Simple string', payload: 'Hello' },
-      { name: 'Query object', payload: { query: 'Test message' } },
-      { name: 'Message object', payload: { message: 'Test message' } },
-      { name: 'Text object', payload: { text: 'Test message' } }
-    ];
-
-    const results = [];
-
-    for (const test of tests) {
-      try {
-        console.log(`🧪 Testing: ${test.name}`);
-        const response = await chatAPI.sendChat(test.payload);
-        results.push({
-          test: test.name,
-          success: true,
-          response: response
-        });
-      } catch (error) {
-        results.push({
-          test: test.name,
-          success: false,
-          error: error.message
-        });
-      }
-    }
-
-    return results;
-  },
-
-  // Check backend connectivity
-  checkBackendConnectivity: async () => {
-    try {
-      const response = await fetch(API_BASE_URL);
-      return {
-        success: true,
-        status: response.status,
-        statusText: response.statusText,
-        message: 'Backend is reachable'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-        message: 'Backend is not reachable'
-      };
-    }
-  }
-};
 
 
 // ========================
@@ -535,7 +516,6 @@ export default {
   admin: adminAPI,
   health: healthAPI,
   support: supportAPI,
-  debug: debugAPI,
   saveConversation,
   getConversations,
   deleteConversation,

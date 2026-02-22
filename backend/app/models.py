@@ -103,8 +103,8 @@ class SupportStatus(str, Enum):
 class SupportTicket(BaseModel):
     name: str = Field(..., min_length=2)
     email: EmailStr
-    type: str
-    priority: str
+    type: str = "General"
+    priority: str = "Medium"
     subject: str = Field(..., min_length=2)
     message: str = Field(..., min_length=10, max_length=2000)
     status: SupportStatus = SupportStatus.PENDING
@@ -134,5 +134,9 @@ class SystemSettings(BaseModel):
     smtp_port: int = 587
     smtp_user: str = "your-email@gmail.com"
     smtp_pass: str = ""
+    
+    # Security
+    jwt_secret_key: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
+    revoke_all_before: datetime = Field(default_factory=datetime.utcnow)
     
     updated_at: datetime = Field(default_factory=datetime.utcnow)

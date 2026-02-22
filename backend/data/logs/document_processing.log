@@ -5041,3 +5041,608 @@ NameError: name 'secrets' is not defined. Did you forget to import 'secrets'
 2026-02-21 12:30:37,466 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
 2026-02-21 12:30:38,012 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
 2026-02-21 12:30:38,087 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:27:59,184 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 23:27:59,185 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 23:28:10,419 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 23:28:10,420 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 23:28:15,935 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 23:28:15,937 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 23:28:15,937 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 23:28:19,992 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 23:28:19,997 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 23:28:35,321 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 23:28:35,678 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 23:28:35,680 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 23:28:35,680 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 23:28:35,697 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 23:28:35,717 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:43:11,463 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 23:43:12,218 - app.routes - INFO - ✅ Admin logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 23:43:14,196 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 23:43:14,238 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:43:14,668 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 23:43:14,691 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:49:46,528 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1015, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 480, in _configured_socket_interface
+    sock = _create_connection(address, options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 385, in _create_connection
+    for res in socket.getaddrinfo(host, port, family=family, type=socket.SOCK_STREAM):  # type: ignore[attr-defined, unused-ignore]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1038, in connect
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 148, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: ac-ufdqkcn-shard-00-00.oydlhwg.mongodb.net:27017: [Errno 11001] getaddrinfo failed (configured timeouts: socketTimeoutMS: 30000.0ms, connectTimeoutMS: 10000.0ms)
+2026-02-21 23:52:58,477 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-21 23:52:58,478 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-21 23:53:08,793 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 23:53:08,793 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-21 23:53:12,763 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-21 23:53:12,765 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-21 23:53:12,768 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-21 23:53:16,723 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-21 23:53:16,724 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-21 23:53:28,946 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-21 23:53:29,283 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-21 23:53:29,285 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-21 23:53:29,285 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-21 23:53:29,312 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 23:53:29,335 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:53:29,409 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 23:53:29,417 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 23:53:44,118 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1015, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 480, in _configured_socket_interface
+    sock = _create_connection(address, options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 385, in _create_connection
+    for res in socket.getaddrinfo(host, port, family=family, type=socket.SOCK_STREAM):  # type: ignore[attr-defined, unused-ignore]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1038, in connect
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 148, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: ac-ufdqkcn-shard-00-02.oydlhwg.mongodb.net:27017: [Errno 11001] getaddrinfo failed (configured timeouts: socketTimeoutMS: 30000.0ms, connectTimeoutMS: 10000.0ms)
+2026-02-21 23:53:56,983 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 23:53:59,144 - app.routes - INFO - ✅ Admin logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 23:54:04,647 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 23:54:04,663 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:54:12,008 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 23:54:12,021 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:55:54,594 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 23:55:54,600 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-21 23:56:50,794 - app.routes - INFO - 🎫 New support ticket created: 14DC8D57
+2026-02-21 23:57:14,950 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-21 23:57:16,609 - app.routes - INFO - ✅ Admin logged in successfully: waqarrahmad.se@gmail.com
+2026-02-21 23:57:20,282 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 23:57:20,297 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:57:22,144 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-21 23:57:22,163 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-21 23:58:29,936 - app.routes - INFO - ✉️ Admin replied to ticket: 699ab6c2cf537d33958e9c66
+2026-02-22 00:04:30,334 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:04:30,335 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:04:34,480 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-22 00:04:34,481 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-22 00:04:38,459 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-22 00:04:38,460 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-22 00:04:38,462 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-22 00:04:41,103 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-22 00:04:41,104 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-22 00:04:51,841 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-22 00:04:52,181 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-22 00:04:52,182 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-22 00:04:52,183 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-22 00:04:52,201 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 00:04:52,218 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 00:05:22,370 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:05:22,371 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:05:26,494 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-22 00:05:26,494 - app.config - INFO - 🦙 Trying Ollama embedding model: mxbai-embed-large
+2026-02-22 00:05:30,729 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-22 00:05:30,730 - app.config - INFO - ✅ Ollama embeddings loaded: mxbai-embed-large
+2026-02-22 00:05:30,731 - app.config - INFO - 🔄 Using Ollama for embeddings (fallback)
+2026-02-22 00:05:33,264 - app.config - INFO - ✅ Ollama running with models: qwen2.5-coder:7b, nomic-embed-text:latest, mxbai-embed-large:latest, llama3.2:latest
+2026-02-22 00:05:33,264 - app.config - INFO - 🦙 Trying Ollama LLM model: llama3.2
+2026-02-22 00:05:43,663 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-22 00:05:43,983 - app.config - INFO - ✅ Ollama LLM loaded: llama3.2
+2026-02-22 00:05:43,983 - app.config - INFO - 🔄 Using Ollama for text generation (fallback)
+2026-02-22 00:05:43,984 - app.config - INFO - 🤖 AI Providers: Embeddings=ollama, LLM=ollama
+2026-02-22 00:05:44,007 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 00:05:44,032 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 00:06:01,337 - app.routes - INFO - 👑 ADMIN SIGNIN attempt for: waqarrahmad.se@gmail.com
+2026-02-22 00:06:02,378 - app.routes - INFO - ✅ Admin logged in successfully: waqarrahmad.se@gmail.com
+2026-02-22 00:06:04,958 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 00:06:04,970 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 00:06:07,142 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 00:06:07,163 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 00:12:46,767 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 00:12:46,785 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 00:12:50,177 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/embed "HTTP/1.1 200 OK"
+2026-02-22 00:13:46,133 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"
+2026-02-22 00:21:28,648 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-22 00:21:29,701 - app.routes - ERROR - Unexpected error in get_current_user: 
+2026-02-22 00:47:59,355 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:47:59,355 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:48:04,198 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:48:04,198 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:48:28,118 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:48:28,118 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:48:29,180 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:48:29,180 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:49:21,533 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:49:21,533 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:49:22,644 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:49:22,644 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:49:54,656 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:49:54,656 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:49:55,413 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:49:55,413 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:50:53,185 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:50:53,185 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:50:53,968 - app.config - INFO - ✅ Directories initialized successfully
+2026-02-22 00:50:53,968 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:54:04,422 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 00:54:04,422 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 00:54:10,234 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-02-22 00:54:10,234 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2026-02-22 01:00:24,404 - huggingface_hub.file_download - WARNING - Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+2026-02-22 01:00:38,151 - app.config - WARNING - 📡 Embeddings: Local HuggingFace (Failover Active)
+2026-02-22 01:00:40,448 - app.config - ERROR - ❌ CRITICAL: No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:00:40,481 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:00:40,494 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 01:02:28,615 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:02:28,616 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:02:29,669 - app.config - ERROR - [CRITICAL] Embedding failover blocked: Index expects 1024 dims, but local fallback is 384.
+2026-02-22 01:02:30,103 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:02:30,118 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:02:30,129 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:02:30,129 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 01:05:57,468 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:05:57,468 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:05:58,918 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Retrieval will be restricted to read-only or fail to prevent corruption.
+2026-02-22 01:06:00,085 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:06:00,100 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:06:00,109 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:06:00,109 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 01:06:31,934 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:06:31,934 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:06:32,390 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Retrieval will be restricted to read-only or fail to prevent corruption.
+2026-02-22 01:06:32,819 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:06:32,841 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:06:32,847 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:06:32,847 - app.config - INFO - ✅ Vector store loaded successfully with 697 documents
+2026-02-22 01:07:28,479 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:07:28,479 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:07:29,270 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Retrieval will be restricted to read-only or fail to prevent corruption.
+2026-02-22 01:07:30,363 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:07:30,381 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:07:30,390 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:07:30,390 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 01:08:09,450 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:08:09,452 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:08:10,151 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Retrieval will be restricted to read-only or fail to prevent corruption.
+2026-02-22 01:08:10,763 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:08:10,780 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:08:10,791 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:08:10,792 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 01:12:11,414 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:12:11,415 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:12:13,135 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Retrieval will be restricted to read-only or fail to prevent corruption.
+2026-02-22 01:12:13,656 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:12:13,673 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:12:13,705 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:12:13,706 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 01:12:40,659 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:12:40,659 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:12:41,818 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Retrieval will be restricted to read-only or fail to prevent corruption.
+2026-02-22 01:12:42,967 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:12:42,983 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:12:42,991 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:12:42,994 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 01:14:39,162 - app.routes - ERROR - Chat failed: name 'hashlib' is not defined
+2026-02-22 01:24:01,575 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:24:01,611 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:24:03,143 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Retrieval will be restricted to read-only or fail to prevent corruption.
+2026-02-22 01:24:04,140 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:24:04,192 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:24:04,229 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:24:04,242 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 01:27:10,318 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:27:10,340 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:27:10,340 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 01:27:10,357 - app.routes - ERROR - Chat failed: 'NoneType' object is not callable
+2026-02-22 01:32:41,912 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:32:41,912 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:32:45,229 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Retrieval will be restricted to read-only or fail to prevent corruption.
+2026-02-22 01:34:40,793 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1055, in connect
+    conn.authenticate()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 510, in authenticate
+    auth.authenticate(creds, self, reauthenticate=reauthenticate)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\auth.py", line 450, in authenticate
+    auth_func(credentials, conn)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\auth.py", line 355, in _authenticate_default
+    return _authenticate_scram(credentials, conn, "SCRAM-SHA-1")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\auth.py", line 135, in _authenticate_scram
+    res = conn.command(source, cmd)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\helpers.py", line 47, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 426, in command
+    self._raise_connection_failure(error)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 398, in command
+    return command(
+           ^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\network.py", line 198, in command
+    reply = receive_message(conn, request_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\network_layer.py", line 759, in receive_message
+    length, _, response_to, op_code = _UNPACK_HEADER(receive_data(conn, 16, deadline))
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\network_layer.py", line 343, in receive_data
+    wait_for_read(conn, deadline)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\network_layer.py", line 318, in wait_for_read
+    raise _OperationCancelled("operation cancelled")
+pymongo.errors._OperationCancelled: operation cancelled
+2026-02-22 01:34:41,812 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1015, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 480, in _configured_socket_interface
+    sock = _create_connection(address, options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 385, in _create_connection
+    for res in socket.getaddrinfo(host, port, family=family, type=socket.SOCK_STREAM):  # type: ignore[attr-defined, unused-ignore]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1038, in connect
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 148, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: ac-ufdqkcn-shard-00-00.oydlhwg.mongodb.net:27017: [Errno 11001] getaddrinfo failed (configured timeouts: socketTimeoutMS: 30000.0ms, connectTimeoutMS: 20000.0ms)
+2026-02-22 01:37:13,668 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 398, in command
+    return command(
+           ^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\network.py", line 198, in command
+    reply = receive_message(conn, request_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\network_layer.py", line 759, in receive_message
+    length, _, response_to, op_code = _UNPACK_HEADER(receive_data(conn, 16, deadline))
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\network_layer.py", line 343, in receive_data
+    wait_for_read(conn, deadline)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\network_layer.py", line 322, in wait_for_read
+    raise socket.timeout("timed out")
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1055, in connect
+    conn.authenticate()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 510, in authenticate
+    auth.authenticate(creds, self, reauthenticate=reauthenticate)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\auth.py", line 450, in authenticate
+    auth_func(credentials, conn)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\auth.py", line 355, in _authenticate_default
+    return _authenticate_scram(credentials, conn, "SCRAM-SHA-1")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\auth.py", line 96, in _authenticate_scram
+    res = conn.command(source, cmd)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\helpers.py", line 47, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 426, in command
+    self._raise_connection_failure(error)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 628, in _raise_connection_failure
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 146, in _raise_connection_failure
+    raise NetworkTimeout(msg) from error
+pymongo.errors.NetworkTimeout: ac-ufdqkcn-shard-00-00.oydlhwg.mongodb.net:27017: timed out (configured timeouts: socketTimeoutMS: 30000.0ms, connectTimeoutMS: 20000.0ms)
+2026-02-22 01:37:24,412 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1015, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 480, in _configured_socket_interface
+    sock = _create_connection(address, options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 385, in _create_connection
+    for res in socket.getaddrinfo(host, port, family=family, type=socket.SOCK_STREAM):  # type: ignore[attr-defined, unused-ignore]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\socket.py", line 976, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2246, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\topology.py", line 710, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 961, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\synchronous\pool.py", line 1038, in connect
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Lenovo\miniconda3\Lib\site-packages\pymongo\pool_shared.py", line 148, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: ac-ufdqkcn-shard-00-02.oydlhwg.mongodb.net:27017: [Errno 11001] getaddrinfo failed (configured timeouts: socketTimeoutMS: 30000.0ms, connectTimeoutMS: 20000.0ms)
+2026-02-22 01:42:43,127 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:42:43,150 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:42:43,168 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2026-02-22 01:42:43,168 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 01:46:30,685 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:46:30,685 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 01:56:25,726 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Using FakeEmbeddings to prevent crash.
+2026-02-22 01:56:27,002 - app.config - ERROR - [CRITICAL] No LLM providers available (Gemini/Groq failed)
+2026-02-22 01:56:27,017 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 01:56:27,027 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 01:57:40,967 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 01:57:40,968 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 02:07:40,606 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Using FakeEmbeddings to prevent crash.
+2026-02-22 02:07:48,996 - app.config - INFO - [SUCCESS] LLM: Groq Llama3.3-70b (Custom REST Active)
+2026-02-22 02:07:49,068 - app.config - INFO - Loading existing vector store (Hash: 7fefc4186e0b0c75...)
+2026-02-22 02:07:49,108 - app.config - INFO - Vector store loaded successfully with 697 documents
+2026-02-22 02:08:55,154 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 02:08:55,156 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 02:18:53,782 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Using FakeEmbeddings to prevent crash.
+2026-02-22 02:18:59,422 - app.config - INFO - [SUCCESS] LLM: Groq Llama3.3-70b (Custom REST Active)
+2026-02-22 02:18:59,428 - app.config - INFO - Creating new vector store - no existing store found
+2026-02-22 02:18:59,592 - app.config - INFO - ✅ Vector store saved successfully with 1 documents
+2026-02-22 02:18:59,593 - app.config - INFO - New vector store created successfully
+2026-02-22 02:20:19,219 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 02:20:19,220 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 02:20:20,547 - app.config - ERROR - [CRITICAL] Embedding failover BLOCKED: Existing vector store expects 1024 dimensions, but Local Fallback generates 384. Using FakeEmbeddings to prevent crash.
+2026-02-22 02:20:22,756 - app.config - INFO - [SUCCESS] LLM: Groq Llama3.3-70b (Custom REST Active)
+2026-02-22 02:20:22,775 - app.config - INFO - Loading existing vector store (Hash: b85189d492e82fab...)
+2026-02-22 02:20:22,778 - app.config - INFO - Vector store loaded successfully with 1 documents
+2026-02-22 02:21:37,870 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 02:21:37,872 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 02:21:50,507 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-02-22 02:21:50,508 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2026-02-22 02:22:14,572 - app.config - WARNING - [FAILOVER] Embeddings: Local HuggingFace Active (384-dim index only)
+2026-02-22 02:22:20,585 - app.config - INFO - [SUCCESS] LLM: Groq Llama3.3-70b (Custom REST Active)
+2026-02-22 02:22:20,601 - app.config - INFO - Creating new vector store - no existing store found
+2026-02-22 02:22:21,145 - app.config - INFO - ✅ Vector store saved successfully with 1 documents
+2026-02-22 02:22:21,148 - app.config - INFO - New vector store created successfully
+2026-02-22 02:24:47,659 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 02:24:47,660 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 02:25:06,925 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-02-22 02:25:06,926 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2026-02-22 02:25:25,068 - app.config - WARNING - [FAILOVER] Embeddings: Local HuggingFace Active (384-dim index only)
+2026-02-22 02:25:28,829 - app.config - INFO - [SUCCESS] LLM: Groq Llama3.3-70b (Custom REST Active)
+2026-02-22 02:25:28,851 - app.config - INFO - Loading existing vector store (Hash: e93401df8366de4c...)
+2026-02-22 02:25:28,856 - app.config - INFO - Vector store loaded successfully with 1 documents
+2026-02-22 02:34:54,848 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 02:34:54,851 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 02:35:18,363 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-02-22 02:35:18,364 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2026-02-22 02:35:47,941 - app.config - WARNING - [FAILOVER] Embeddings: Local HuggingFace Active (384-dim index only)
+2026-02-22 02:35:54,768 - app.config - INFO - [SUCCESS] LLM: Groq Llama3.3-70b (Custom REST Active)
+2026-02-22 02:35:54,787 - app.config - INFO - Loading existing vector store (Hash: e93401df8366de4c...)
+2026-02-22 02:35:54,791 - app.config - INFO - Vector store loaded successfully with 1 documents
+2026-02-22 03:11:52,468 - app.config - INFO - Loading existing vector store (Hash: 1f14d1492bd2fe23...)
+2026-02-22 03:11:52,594 - app.config - INFO - Vector store loaded successfully with 516 documents
+2026-02-22 03:13:11,928 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 03:13:11,928 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 03:13:35,497 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-02-22 03:13:35,499 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2026-02-22 03:13:49,717 - app.config - WARNING - [FAILOVER] Embeddings: Local HuggingFace Active (384-dim index only)
+2026-02-22 03:13:52,250 - app.config - INFO - [SUCCESS] LLM: Groq Llama3.3-70b (Custom REST Active)
+2026-02-22 03:13:52,263 - app.config - INFO - Loading existing vector store (Hash: 1f14d1492bd2fe23...)
+2026-02-22 03:13:52,285 - app.config - INFO - Vector store loaded successfully with 516 documents
+2026-02-22 03:22:10,585 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 03:22:10,585 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 03:22:14,494 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 03:22:16,267 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 03:22:16,300 - app.config - INFO - Loading existing vector store (Hash: 1f14d1492bd2fe23...)
+2026-02-22 03:22:16,332 - app.config - INFO - Vector store loaded successfully with 516 documents
+2026-02-22 04:16:49,488 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 04:16:49,490 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 04:16:50,044 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 04:16:50,529 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 04:16:50,572 - app.config - INFO - Loading existing vector store (Hash: c9290d48ce2510b7...)
+2026-02-22 04:16:50,575 - app.config - INFO - Vector store loaded successfully with 1 documents
+2026-02-22 04:23:16,818 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 04:23:16,818 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 04:23:17,357 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 04:23:17,832 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 04:23:17,869 - app.config - INFO - Creating new vector store - no existing store found
+2026-02-22 04:23:18,757 - app.config - INFO - ✅ Vector store saved successfully with 1 documents
+2026-02-22 04:23:18,758 - app.config - INFO - New vector store created successfully
+2026-02-22 04:27:56,800 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 04:27:56,800 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 04:27:57,389 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 04:27:57,851 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 04:27:57,863 - app.config - INFO - Creating new vector store - no existing store found
+2026-02-22 04:27:59,399 - app.config - INFO - ✅ Vector store saved successfully with 1 documents
+2026-02-22 04:27:59,400 - app.config - INFO - New vector store created successfully
+2026-02-22 04:30:42,464 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 04:30:42,467 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 04:30:42,989 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 04:30:43,487 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 04:30:43,525 - app.config - INFO - Loading existing vector store (Hash: 52420c01417cd21d...)
+2026-02-22 04:30:43,541 - app.config - INFO - Vector store loaded successfully with 101 documents
+2026-02-22 04:54:10,153 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 04:54:10,153 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 04:54:11,145 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 04:54:11,820 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 04:54:11,839 - app.config - INFO - Creating new vector store - no existing store found
+2026-02-22 04:54:12,769 - app.config - INFO - ✅ Vector store saved successfully with 1 documents
+2026-02-22 04:54:12,769 - app.config - INFO - New vector store created successfully
+2026-02-22 09:23:05,778 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:23:05,779 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:23:06,618 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 09:23:07,238 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:23:07,269 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 09:23:07,283 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 09:23:36,102 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:23:36,103 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:23:38,353 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 09:23:40,139 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:23:40,172 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 09:23:40,185 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 09:54:15,849 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:54:15,850 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:54:18,192 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 09:54:19,903 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:54:19,953 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 09:54:19,979 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 09:54:56,312 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:54:56,313 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:54:58,323 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 09:54:59,216 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:54:59,249 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 09:54:59,271 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 09:55:39,352 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:55:39,352 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:55:41,613 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 09:55:43,714 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:55:43,748 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 09:55:43,763 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 09:56:03,549 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:56:03,549 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:56:06,655 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 09:56:07,642 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:56:14,144 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:56:14,145 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:56:15,018 - app.config - INFO - [SUCCESS] Embeddings: Gemini-001 (Active) - Dim: 768
+2026-02-22 09:56:15,798 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:56:15,829 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 09:56:15,841 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 09:57:29,072 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:57:29,072 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:57:29,915 - app.config - INFO - [SUCCESS] Embeddings: text-embedding-004 (Active) - Dim: 3072
+2026-02-22 09:57:31,019 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:57:31,053 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 09:57:31,070 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 09:57:54,996 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:57:54,996 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:57:55,752 - app.config - INFO - [SUCCESS] Embeddings: text-embedding-004 (Active) - Dim: 3072
+2026-02-22 09:57:57,702 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:57:57,747 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 09:57:57,760 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 09:58:23,806 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:58:23,807 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:58:25,785 - app.config - INFO - [SUCCESS] Embeddings: text-embedding-004 (Active) - Dim: 3072
+2026-02-22 09:58:26,263 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 09:59:39,756 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 09:59:39,757 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 09:59:44,550 - app.config - INFO - [SUCCESS] Embeddings: text-embedding-004 (Active) - Dim: 3072
+2026-02-22 09:59:45,313 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 10:16:15,735 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:16:15,735 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:16:15,741 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:16:15,741 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:16:50,649 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:16:50,650 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:16:50,666 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:16:50,667 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:17:36,886 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:17:36,916 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:17:36,932 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:17:36,932 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:18:35,641 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:18:35,642 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:18:35,658 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:18:35,658 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:20:23,120 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:20:23,121 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:20:23,135 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:20:23,136 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:21:15,872 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:21:15,873 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:21:18,432 - app.config - INFO - [SUCCESS] Embeddings: text-embedding-004 (Active) - Dim: 3072
+2026-02-22 10:21:19,836 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 10:21:19,863 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 10:21:19,878 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 10:22:04,118 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:22:04,118 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:22:06,143 - app.config - INFO - [SUCCESS] Embeddings: text-embedding-004 (Active) - Dim: 3072
+2026-02-22 10:22:07,804 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 10:22:07,855 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 10:22:07,875 - app.config - INFO - Vector store loaded successfully with 466 documents
+2026-02-22 10:24:19,898 - app.routes - INFO - 🔐 LOGIN attempt for: waqarrahmad.se@gmail.com
+2026-02-22 10:24:20,959 - app.routes - INFO - ✅ User logged in successfully: waqarrahmad.se@gmail.com
+2026-02-22 10:31:20,604 - app.config - INFO - [SUCCESS] Directories initialized successfully
+2026-02-22 10:31:20,604 - app.config - INFO - FAISS running in CPU-only mode (as configured)
+2026-02-22 10:31:27,073 - app.config - INFO - [SUCCESS] Embeddings: text-embedding-004 (Active) - Dim: 3072
+2026-02-22 10:31:28,813 - app.config - INFO - [SUCCESS] LLM: Gemini Flash (Primary)
+2026-02-22 10:31:28,835 - app.config - INFO - Loading existing vector store (Hash: b9adf983247a2073...)
+2026-02-22 10:31:28,845 - app.config - INFO - Vector store loaded successfully with 466 documents

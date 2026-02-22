@@ -69,8 +69,8 @@ const SupportCenter = () => {
     const fetchTickets = useCallback(async () => {
         setLoading(true);
         try {
-            const filter = statusMap[tab];
-            const response = await supportAPI.getTickets(filter);
+            // Always fetch all tickets now that status filters are removed from UI
+            const response = await supportAPI.getTickets(null);
             if (response.success) {
                 setTickets(response.data.tickets || []);
             } else {
@@ -81,7 +81,7 @@ const SupportCenter = () => {
         } finally {
             setLoading(false);
         }
-    }, [tab]);
+    }, []);
 
     useEffect(() => {
         fetchTickets();
@@ -190,21 +190,7 @@ const SupportCenter = () => {
                 </Box>
             </Box>
 
-            <Tabs
-                value={tab}
-                onChange={(e, v) => setTab(v)}
-                sx={{
-                    mb: 3,
-                    '& .MuiTab-root': { color: '#94a3b8', fontWeight: 700, minWidth: 100 },
-                    '& .Mui-selected': { color: '#3b82f6' },
-                    '& .MuiTabs-indicator': { bgcolor: '#3b82f6' }
-                }}
-            >
-                <Tab label="All Tickets" />
-                <Tab label="Pending" />
-                <Tab label="Read" />
-                <Tab label="Replied" />
-            </Tabs>
+            {/* Removed Tabs to simplify support view */}
 
             {loading ? (
                 <Box sx={{ py: 10, textAlign: 'center' }}><CircularProgress size={30} sx={{ color: '#3b82f6' }} /></Box>

@@ -180,6 +180,14 @@ const Footer = () => {
             </FooterLink>
             <FooterLink
               component={Link}
+              to="/admin/signin"
+              underline="none"
+              sx={{ color: '#3b82f6', fontWeight: 600 }}
+            >
+              Admin Panel
+            </FooterLink>
+            <FooterLink
+              component={Link}
               to="/try-it"
               underline="none"
             >

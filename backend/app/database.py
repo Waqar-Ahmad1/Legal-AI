@@ -14,14 +14,16 @@ load_dotenv()
 
 class DatabaseManager:
     def __init__(self):
-        self.MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://waqarahmadisbest_db_user:rhXf7vkxHpqrT0eR@waqarahmad.oydlhwg.mongodb.net/")
+        self.MONGO_URI = os.getenv("MONGO_URI")
+        if not self.MONGO_URI:
+            raise RuntimeError("MONGO_URI environment variable is required. Set it in .env file.")
         self.DB_NAME = os.getenv("DB_NAME", "legal_ai")
         self.client = None
         self.db = None
         self.is_connected = False
         self._connect_with_retry()
 
-    def _connect_with_retry(self, max_retries: int = 3, delay: int = 2):
+    def _connect_with_retry(self, max_retries: int = 5, delay: int = 5):
         """Establish database connection with retry logic"""
         for attempt in range(max_retries):
             try:
@@ -34,8 +36,8 @@ class DatabaseManager:
                 
                 self.client = MongoClient(
                     connection_string,
-                    serverSelectionTimeoutMS=10000,
-                    connectTimeoutMS=10000,
+                    serverSelectionTimeoutMS=30000, # Increased for slow DNS
+                    connectTimeoutMS=20000,
                     socketTimeoutMS=30000,
                     maxPoolSize=50,
                     minPoolSize=10,
@@ -44,21 +46,21 @@ class DatabaseManager:
                 )
                 
                 # Test connection
-                self.client.admin.command('ping', socketTimeoutMS=5000)
+                self.client.admin.command('ping', socketTimeoutMS=10000)
                 self.db = self.client[self.DB_NAME]
                 self.is_connected = True
                 
-                logger.info("✅ MongoDB connection established successfully")
+                logger.info("[SUCCESS] MongoDB connection established successfully")
                 self._create_indexes()
                 return
                 
             except Exception as e:
-                logger.warning(f"❌ MongoDB connection attempt {attempt + 1} failed: {str(e)}")
+                logger.warning(f"[FAILURE] MongoDB connection attempt {attempt + 1} failed: {str(e)}")
                 if attempt < max_retries - 1:
                     logger.info(f"Retrying in {delay} seconds...")
                     time.sleep(delay)
                 else:
-                    logger.error("❌ All MongoDB connection attempts failed")
+                    logger.error("[CRITICAL] All MongoDB connection attempts failed")
                     self.is_connected = False
                     # Don't use fallback - fail properly
 
@@ -79,10 +81,13 @@ class DatabaseManager:
             self.db.support_tickets.create_index("created_at")
             self.db.support_tickets.create_index("status")
             self.db.system_settings.create_index("updated_at")
+            self.db.conversations.create_index([("user_id", 1), ("updated_at", -1)])
+            self.db.semantic_cache.create_index("query_hash", unique=True)
+            self.db.semantic_cache.create_index("created_at")
             
-            logger.info("✅ Database indexes created successfully")
+            logger.info("[SUCCESS] Database indexes created successfully")
         except Exception as e:
-            logger.error(f"❌ Error creating indexes: {e}")
+            logger.error(f"[ERROR] Error creating indexes: {e}")
 
     def get_collection(self, collection_name: str):
         """Get database collection - ONLY returns real MongoDB collection"""
@@ -100,7 +105,7 @@ class DatabaseManager:
             if self.client and self.is_connected:
                 self.client.admin.command('ping', socketTimeoutMS=3000)
                 return True
-        except:
+        except Exception:
             self.is_connected = False
         return False
 
@@ -150,6 +155,18 @@ def get_documents_collection():
     if not db_manager.is_connected:
         raise RuntimeError("Database not connected. Cannot access documents collection.")
     return db_manager.get_collection("documents")
+
+def get_conversations_collection():
+    """Get conversations collection"""
+    if not db_manager.is_connected:
+        raise RuntimeError("Database not connected")
+    return db_manager.get_collection("conversations")
+
+def get_semantic_cache_collection():
+    """Get semantic cache collection"""
+    if not db_manager.is_connected:
+        raise RuntimeError("Database not connected")
+    return db_manager.get_collection("semantic_cache")
 
 def is_database_connected() -> bool:
     """Check if database is connected"""

@@ -25,9 +25,8 @@ async def send_verification_email(email: str, token: str):
     Sends a real verification email to the user using fastapi-mail.
     """
     try:
-        # In production, use the actual frontend URL from env
-        # verification_link = f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/verify-email?token={token}"
-        verification_link = f"http://localhost:3000/verify-email?token={token}"
+        frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+        verification_link = f"{frontend_url}/verify-email?token={token}"
         
         html = f"""
         <html>
@@ -64,7 +63,7 @@ async def send_verification_email(email: str, token: str):
     except Exception as e:
         logger.error(f"❌ Failed to send real verification email to {email}: {str(e)}")
         # Fallback to logging the link in development if sending fails
-        logger.info(f"🔗 FALLBACK - Verification Link: http://localhost:3000/verify-email?token={token}")
+        logger.info(f"🔗 FALLBACK - Verification Link: {frontend_url}/verify-email?token={token}")
         return False
 
 async def send_password_reset_email(email: str, token: str):
@@ -72,7 +71,8 @@ async def send_password_reset_email(email: str, token: str):
     Sends a password reset email to the user.
     """
     try:
-        reset_link = f"http://localhost:3000/reset-password?token={token}"
+        frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+        reset_link = f"{frontend_url}/reset-password?token={token}"
         
         html = f"""
         <html>
@@ -108,5 +108,5 @@ async def send_password_reset_email(email: str, token: str):
         return True
     except Exception as e:
         logger.error(f"❌ Failed to send password reset email to {email}: {str(e)}")
-        logger.info(f"🔗 FALLBACK - Reset Link: http://localhost:3000/reset-password?token={token}")
+        logger.info(f"🔗 FALLBACK - Reset Link: {frontend_url}/reset-password?token={token}")
         return False

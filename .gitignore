@@ -1,0 +1,47 @@
+# ========================
+# Environment & Secrets
+# ========================
+.env
+*.env.local
+
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ========================
+# Node / React
+# ========================
+node_modules/
+frontend/build/
+
+# ========================
+# Data & Uploads
+# ========================
+backend/data/logs/
+backend/data/backups/
+backend/data/uploads/
+backend/data/vector_store/
+backend/data/exports/
+
+# ========================
+# IDE & OS
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+.DS_Store
+
+# ========================
+# Verification Scripts (dev-only)
+# ========================
+verify_*.py
+find_*.py

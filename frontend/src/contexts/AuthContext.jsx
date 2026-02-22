@@ -87,7 +87,18 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Clear HttpOnly cookie via backend
+    try {
+      await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000'}/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (e) {
+      console.error('Logout endpoint error:', e);
+    }
+
+    // Clear localStorage fallback
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     localStorage.removeItem('adminUser');

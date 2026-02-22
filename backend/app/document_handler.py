@@ -17,6 +17,8 @@ import faiss
 from urllib3.exceptions import HTTPError
 import requests
 from requests.exceptions import RequestException
+import json
+from app.config import ai_provider
 
 # Configure CPU settings for FAISS
 os.environ.update({
@@ -26,11 +28,16 @@ os.environ.update({
 faiss.omp_set_num_threads(4)
 
 # Configure logging
+BASE_DIR = Path(__file__).resolve().parent.parent
+LOG_DIR = BASE_DIR / "data" / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / "document_processing.log"
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('data/logs/document_processing.log', encoding='utf-8'),
+        logging.FileHandler(str(LOG_FILE), encoding='utf-8'),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -150,11 +157,16 @@ class TextPreprocessor:
             references['has_clauses'] = True
             references['clauses'] = list(set(clause_matches))
         
-        # Legal citations (basic pattern)
+        # Legal citations (flexible for US and Pakistan)
         citation_patterns = [
             r'\b\d+\s+U\.?S\.?C\.?\s+§?\s*\d+',
             r'\b\d+\s+S\.?Ct\.?\s+\d+',
             r'\b\d+\s+F\.?\d+d\s+\d+',
+            # Pakistani Citations (Flexible Year & Journal positions)
+            r'\b(?:PLD|SCMR|CLC|PCrLJ|YLR|PLC|PTD|CLD)\s+\d{4}\s+[A-Z][a-zA-Z\s]+\d+\b',
+            r'\b\d{4}\s+(?:PLD|SCMR|CLC|PCrLJ|YLR|PLC|PTD|CLD)\s+[A-Z][a-zA-Z\s]+\d+\b',
+            r'\b\d{4}\s+(?:PLD|SCMR|CLC|PCrLJ|YLR|PLC|PTD|CLD)\s+\d+\b',
+            r'\b(?:PLD|SCMR|CLC|PCrLJ|YLR|PLC|PTD|CLD)\s+\d{4}\s+\d+\b',
         ]
         
         for pattern in citation_patterns:
@@ -188,6 +200,53 @@ class TextPreprocessor:
         
         return found_topics[:max_topics]
 
+    @staticmethod
+    def extract_legal_metadata_with_llm(text: str) -> Dict[str, Any]:
+        """Use LLM to extract professional legal metadata from document sample"""
+        from app.config import llm
+        
+        if not llm:
+            return {}
+            
+        prompt = f"""
+        Analyze the following legal document text and extract key metadata in JSON format.
+        Focus on Pakistani legal context if applicable.
+        
+        Fields to extract:
+        - court_name: The specific court (e.g., Supreme Court of Pakistan, High Court of Sindh)
+        - case_id: The formal case number or citation index
+        - parties: {{ "petitioner": "...", "respondent": "..." }}
+        - decision_date: The date of the judgment/ordinance
+        - legal_provisions: List of specific Articles, Sections, or Clauses referenced
+        - core_subject: One line summary of the legal issue (e.g., Criminal Appeal, Constitutional Petition)
+        
+        Text Sample:
+        {text[:4000]}
+        
+        Response must be ONLY valid JSON.
+        """
+        
+        try:
+            response = llm.invoke(prompt)
+            content = response.content if hasattr(response, 'content') else str(response)
+            
+            # Extract JSON from response (handling potential markdown blocks)
+            json_match = re.search(r'```json\n(.*?)\n```', content, re.DOTALL)
+            if json_match:
+                content = json_match.group(1)
+            else:
+                # Try simple brace match
+                json_match = re.search(r'(\{.*\})', content, re.DOTALL)
+                if json_match:
+                    content = json_match.group(1)
+            
+            extracted = json.loads(content)
+            logger.info(f"[SUCCESS] LLM Metadata Extraction successful: {extracted.get('court_name')}")
+            return extracted
+        except Exception as e:
+            logger.warning(f"[WARN] LLM Metadata Extraction failed: {e}")
+            return {}
+
 class LegalAwareTextSplitter(RecursiveCharacterTextSplitter):
     """Enhanced text splitter optimized for legal documents"""
     
@@ -209,12 +268,16 @@ class LegalAwareTextSplitter(RecursiveCharacterTextSplitter):
             "",
         ]
         
+        # Extract known args to avoid multiple values error in super().__init__
+        chunk_size = kwargs.pop('chunk_size', 1000)
+        chunk_overlap = kwargs.pop('chunk_overlap', 200)
+        
         super().__init__(
             separators=legal_separators,
             keep_separator=True,
             is_separator_regex=True,
-            chunk_size=kwargs.get('chunk_size', 1000),
-            chunk_overlap=kwargs.get('chunk_overlap', 200),
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
             length_function=len,
             **kwargs
         )
@@ -245,23 +308,51 @@ class DocumentProcessor:
         self.preprocessor = TextPreprocessor()
     
     def _load_pdf(self, file_path: str) -> List[Document]:
-        """Load PDF documents with enhanced error handling"""
+        """Load PDF documents with enhanced error handling and professional OCR fallback"""
         try:
             loader = PyPDFLoader(file_path)
             documents = loader.load()
-            logger.info(f"Loaded {len(documents)} pages from PDF")
+            
+            # Check if text extraction actually yielded content (detect scanned PDFs)
+            total_text = "".join([doc.page_content for doc in documents]).strip()
+            if len(total_text) < 100:  # Suspiciously low text for a legal PDF
+                logger.warning(f"⚠️ PDF {file_path} contains very little text. Attempting OCR fallback...")
+                return self._load_pdf_ocr(file_path)
+                
+            logger.info(f"Loaded {len(documents)} pages from PDF via standard loader")
             return documents
         except Exception as e:
-            logger.error(f"PDF loading failed: {e}")
-            # Fallback to unstructured loader
+            logger.error(f"Standard PDF loading failed: {e}")
+            return self._load_pdf_ocr(file_path)
+
+    def _load_pdf_ocr(self, file_path: str) -> List[Document]:
+        """Professional OCR fallback for scanned legal documents"""
+        try:
+            import pytesseract
+            from pdf2image import convert_from_path
+            from PIL import Image
+            
+            logger.info(f"🔍 Running OCR on: {file_path}")
+            images = convert_from_path(file_path)
+            documents = []
+            
+            for i, image in enumerate(images):
+                text = pytesseract.image_to_string(image)
+                documents.append(Document(
+                    page_content=text,
+                    metadata={"source": file_path, "page": i, "method": "ocr"}
+                ))
+            
+            logger.info(f"✅ OCR complete. Extracted {len(documents)} pages.")
+            return documents
+        except Exception as ocr_error:
+            logger.error(f"OCR Fallback failed: {ocr_error}")
+            # Final fallback to unstructured
             try:
                 loader = UnstructuredFileLoader(file_path)
-                documents = loader.load()
-                logger.info(f"Fallback loader loaded {len(documents)} pages from PDF")
-                return documents
-            except Exception as fallback_error:
-                logger.error(f"PDF fallback loading also failed: {fallback_error}")
-                raise RuntimeError(f"Failed to load PDF: {str(e)}")
+                return loader.load()
+            except Exception:
+                raise RuntimeError(f"Failed to process PDF even with OCR: {str(ocr_error)}")
     
     def _load_docx(self, file_path: str) -> List[Document]:
         """Load DOCX documents"""
@@ -345,11 +436,11 @@ class DocumentProcessor:
                 "filename": Path(file_path).name
             }
             
-            logger.info(f"✅ File validated: {file_path} (Size: {validation_result['file_size_mb']:.2f}MB, Checksum: {checksum[:16]}...)")
+            logger.info(f"[SUCCESS] File validated: {file_path} (Size: {validation_result['file_size_mb']:.2f}MB, Checksum: {checksum[:16]}...)")
             return validation_result
             
         except Exception as e:
-            logger.error(f"❌ File validation failed for {file_path}: {str(e)}")
+            logger.error(f"[ERROR] File validation failed for {file_path}: {str(e)}")
             raise
     
     def load_document(self, file_path: str) -> List[Document]:
@@ -371,11 +462,11 @@ class DocumentProcessor:
             # Validate file first
             validation_info = self.validate_file(file_path)
             
-            logger.info(f"🔄 Starting document processing: {file_path}")
+            logger.info(f"[PROCESS] Starting document processing: {file_path}")
             
             # Load document
             raw_documents = self.load_document(file_path)
-            logger.info(f"📄 Loaded {len(raw_documents)} raw document sections")
+            logger.info(f"[LOAD] Loaded {len(raw_documents)} raw document sections")
             
             # Extract document-level metadata from first few pages
             document_level_metadata = self._extract_document_level_metadata(raw_documents, doc_type, source_name)
@@ -401,29 +492,43 @@ class DocumentProcessor:
             # Split documents
             chunks = splitter.split_documents(raw_documents)
             
-            # Filter out meaningless chunks
+            # Step 4: Step-up to Contextual Retrieval (Professional Grade)
+            # Generate a global document summary for context injection
+            # We take a sample of the document to generate a high-level context
+            full_text_sample = "".join([d.page_content for d in raw_documents[:10]])
+            global_summary = ai_provider.generate_doc_summary(full_text_sample)
+            logger.info(f"🧠 Generated Global Context: {global_summary[:100]}...")
+            
+            # Step 5: Process chunks with Contextual Injection & Parent Mapping
+            # Create a mapping of page numbers to page text for Parent-Document context
+            page_text_map = {doc.metadata.get("page", 1): doc.page_content for doc in raw_documents}
+            
             meaningful_chunks = []
-            for chunk in chunks:
+            for i, chunk in enumerate(chunks):
                 if self.preprocessor.is_meaningful_text(chunk.page_content):
+                    # Find parent page text
+                    parent_page = chunk.metadata.get("page", 1)
+                    parent_text = page_text_map.get(parent_page, "")
+                    
+                    # Enhance metadata (including Parent context)
+                    self._enhance_chunk_metadata(chunk, i, validation_info, document_level_metadata, file_path, parent_text=parent_text)
+                    
+                    # Contextual Retrieval: Prepend global summary to content
+                    # [PRO-LEVEL RAG 2.0]
+                    context_prefix = f"[Document Context: {global_summary}]\n\n"
+                    chunk.page_content = context_prefix + chunk.page_content
+                    
                     meaningful_chunks.append(chunk)
-            
-            logger.info(f"📊 Split into {len(meaningful_chunks)} meaningful chunks (from {len(chunks)} total)")
-            
-            # Enhanced metadata for each chunk
-            for i, chunk in enumerate(meaningful_chunks):
-                self._enhance_chunk_metadata(chunk, i, validation_info, document_level_metadata, file_path)
-            
+
             processing_time = (datetime.utcnow() - start_time).total_seconds()
-            logger.info(f"✅ Document processing completed in {processing_time:.2f}s: {len(meaningful_chunks)} chunks")
+            logger.info(f"✅ RAG 2.0 processing completed in {processing_time:.2f}s: {len(meaningful_chunks)} contextualized chunks")
             
             processing_info = {
                 "processing_time_seconds": processing_time,
                 "original_sections": len(raw_documents),
                 "total_chunks_generated": len(chunks),
                 "meaningful_chunks_kept": len(meaningful_chunks),
-                "filtered_out_chunks": len(chunks) - len(meaningful_chunks),
-                "average_words_per_chunk": sum(len(chunk.page_content.split()) for chunk in meaningful_chunks) / len(meaningful_chunks) if meaningful_chunks else 0,
-                "document_metadata": document_level_metadata,
+                "global_summary": global_summary,
                 "status": "success"
             }
             
@@ -453,11 +558,19 @@ class DocumentProcessor:
         content_metadata = self.preprocessor.extract_document_metadata(sample_content)
         metadata.update(content_metadata)
         
+        # Add LLM-powered metadata (Advanced RAG)
+        llm_metadata = self.preprocessor.extract_legal_metadata_with_llm(sample_content)
+        if llm_metadata:
+            metadata.update(llm_metadata)
+            # Override document_type if LLM found a better one
+            if llm_metadata.get('core_subject'):
+                metadata['document_type'] = f"{doc_type} ({llm_metadata['core_subject']})"
+        
         return metadata
     
     def _enhance_chunk_metadata(self, chunk: Document, chunk_index: int, validation_info: Dict[str, Any], 
-                               document_metadata: Dict[str, Any], file_path: str) -> None:
-        """Enhance chunk metadata with comprehensive information"""
+                               document_metadata: Dict[str, Any], file_path: str, parent_text: str = None) -> None:
+        """Enhance chunk metadata with comprehensive information including Parent Context"""
         # Base metadata
         chunk_metadata = {
             "document_type": document_metadata.get("document_type", "Legal Document"),
@@ -469,6 +582,9 @@ class DocumentProcessor:
             "file_extension": validation_info["extension"],
             "processing_time": datetime.utcnow().isoformat(),
             "processing_mode": "CPU",
+            
+            # Parent Context (Small-to-Big Retrieval Support)
+            "parent_context": parent_text[:5000] if parent_text else chunk.page_content, # Cap to avoid massive metadata
             
             # Chunk identification
             "chunk_id": f"{Path(file_path).stem}-{chunk_index:04d}",
@@ -484,6 +600,14 @@ class DocumentProcessor:
             "document_category": document_metadata.get("document_category", "general"),
             "complexity": document_metadata.get("complexity", "medium"),
             "topics": document_metadata.get("topics", []),
+            
+            # Professional Legal Metadata
+            "court_name": document_metadata.get("court_name", "N/A"),
+            "case_id": document_metadata.get("case_id", "N/A"),
+            "petitioner": document_metadata.get("parties", {}).get("petitioner", "N/A"),
+            "respondent": document_metadata.get("parties", {}).get("respondent", "N/A"),
+            "decision_date": document_metadata.get("decision_date", "N/A"),
+            "legal_provisions": document_metadata.get("legal_provisions", []),
         }
         
         # Add content-specific metadata
@@ -501,7 +625,41 @@ class VectorStoreManager:
     """Enhanced vector store management with robust error handling"""
     
     def __init__(self):
-        self.batch_size = 10  # Smaller batches for Ollama stability
+        self.batch_size = 50  # Balanced for Gemini rate limits and payload size
+        
+    def delete_vectors_by_source(self, source_name: str) -> Dict[str, Any]:
+        """Remove all vectors associated with a specific source/filename"""
+        try:
+            from app.config import load_vector_store, save_vector_store
+            store = load_vector_store()
+            
+            if not store:
+                return {"success": False, "message": "Vector store not found"}
+            
+            # Find all doc IDs with matching source metadata
+            ids_to_delete = []
+            for doc_id, doc in store.docstore._dict.items():
+                if doc.metadata.get("source") == source_name or doc.metadata.get("title") == source_name:
+                    ids_to_delete.append(doc_id)
+            
+            if not ids_to_delete:
+                return {"success": True, "message": f"No documents found for source: {source_name}", "deleted_count": 0}
+            
+            # Delete from FAISS
+            store.delete(ids_to_delete)
+            
+            # Save the updated store
+            success, message = save_vector_store(store)
+            
+            logger.info(f"🗑️ Deleted {len(ids_to_delete)} vectors for source: {source_name}")
+            return {
+                "success": success,
+                "message": message,
+                "deleted_count": len(ids_to_delete)
+            }
+        except Exception as e:
+            logger.error(f"Error deleting vectors: {e}")
+            return {"success": False, "message": str(e)}
     
     @retry(
         stop=stop_after_attempt(3),
@@ -513,7 +671,7 @@ class VectorStoreManager:
         start_time = datetime.utcnow()
         
         try:
-            logger.info(f"🔄 Preparing to add {len(documents)} documents to vector store")
+            logger.info(f"[INDEX] Preparing to add {len(documents)} documents to vector store")
             
             # Import here to avoid circular imports
             from app.config import load_vector_store, save_vector_store, embeddings_manager
@@ -524,7 +682,7 @@ class VectorStoreManager:
             
             # Get provider info for logging
             provider_info = embeddings_manager.get_provider_info()
-            logger.info(f"Using embedder: {provider_info['embeddings']['type']} (fallback: {provider_info['fallback_mode']})")
+            logger.info(f"Using embedder: {provider_info['embeddings']['type']}")
             
             # Adjust batch size based on embedder type
             if provider_info['embeddings']['type'] == 'ollama':
@@ -542,10 +700,24 @@ class VectorStoreManager:
                 batch_num = (batch_idx // self.batch_size) + 1
                 
                 try:
-                    logger.info(f"🔄 Processing batch {batch_num}/{total_batches} ({len(batch)} documents)")
-                    store.add_documents(batch)
+                    logger.info(f"[INDEX] Processing batch {batch_num}/{total_batches} ({len(batch)} documents)")
+                    from app.config import ai_provider
+                    
+                    # Gemini Free Tier limit is 100 RPM or 1500 RPD
+                    # Cooldown every 2 batches of 50 to stay under 100 RPM
+                    if batch_num > 1 and (batch_num - 1) % 2 == 0:
+                        logger.warning(f"⏳ Rate limit cooldown: Sleeping for 61s before batch {batch_num}...")
+                        import time
+                        time.sleep(61)
+                        
+                    if store is None:
+                        # Initialize new store for the first successful batch
+                        store = FAISS.from_documents(batch, ai_provider.embedder)
+                    else:
+                        store.add_documents(batch)
+                    
                     successful_batches += 1
-                    logger.info(f"✅ Added batch {batch_num}/{total_batches} ({len(batch)} documents)")
+                    logger.info(f"[SUCCESS] Added batch {batch_num}/{total_batches} ({len(batch)} documents)")
                     
                 except Exception as batch_error:
                     failed_batches += 1
@@ -605,7 +777,6 @@ class VectorStoreManager:
                 "failed_batch_details": failed_batch_details,
                 "embedder_type": provider_info['embeddings']['type'],
                 "llm_type": provider_info['llm']['type'],
-                "fallback_mode": provider_info['fallback_mode'],
                 "total_words": total_words,
                 "total_characters": total_chars,
                 "average_words_per_doc": total_words / len(documents) if documents else 0,
@@ -617,7 +788,7 @@ class VectorStoreManager:
                 "timestamp": datetime.utcnow().isoformat()
             }
             
-            logger.info(f"✅ Vector store update completed: {result}")
+            logger.info(f"[SUCCESS] Vector store update completed: {result}")
             return result
             
         except Exception as e:
@@ -676,7 +847,7 @@ def ingest_document(
                 "pipeline_end_time": datetime.utcnow().isoformat(),
                 "total_processing_time": (datetime.utcnow() - pipeline_start).total_seconds()
             })
-            logger.warning(f"⚠️ No meaningful content in {file_path}")
+            logger.warning(f"[WARN] No meaningful content in {file_path}")
             return pipeline_info
         
         # Step 2: Add to vector store
@@ -694,13 +865,13 @@ def ingest_document(
         
         # Final logging
         if pipeline_info["status"] == "success":
-            logger.info(f"🎉 Ingestion completed successfully in {total_time:.2f}s: {len(chunks)} chunks added")
+            logger.info(f"[SUCCESS] Ingestion completed successfully in {total_time:.2f}s: {len(chunks)} chunks added")
             logger.info(f"📊 Document Metadata: {pipeline_info.get('document_metadata', {})}")
         elif pipeline_info["status"] == "partial":
-            logger.warning(f"⚠️ Ingestion partially completed in {total_time:.2f}s: {pipeline_info['successful_batches']}/{pipeline_info['total_batches']} batches succeeded")
+            logger.warning(f"[WARN] Ingestion partially completed in {total_time:.2f}s: {pipeline_info['successful_batches']}/{pipeline_info['total_batches']} batches succeeded")
             logger.warning(f"📋 Failed batches: {pipeline_info.get('failed_batch_details', [])}")
         else:
-            logger.error(f"❌ Ingestion failed after {total_time:.2f}s")
+            logger.error(f"[ERROR] Ingestion failed after {total_time:.2f}s")
             logger.error(f"📋 Error details: {pipeline_info.get('failed_batch_details', [])}")
         
         return pipeline_info

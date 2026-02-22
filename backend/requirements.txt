@@ -10,7 +10,7 @@ python-jose[cryptography]
 langchain
 langchain-community
 langchain-google-genai
-langchain-ollama
+langchain-groq
 google-generativeai
 faiss-cpu
 tenacity
@@ -22,3 +22,9 @@ pypdf
 docx2txt
 python-multipart
 fastapi-mail
+python-docx
+reportlab
+sentence-transformers
+pytesseract
+pdf2image
+Pillow

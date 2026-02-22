@@ -1,4 +1,5 @@
 import os
+import re
 # Suppress OpenMP warning - must be at the VERY TOP
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
@@ -6,7 +7,7 @@ import sys
 from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List, Any
 import hashlib
 from pathlib import Path
 import logging
@@ -23,9 +24,8 @@ from requests.exceptions import RequestException
 import json
 
 
-# Force IPv4 and disable SSL verification for compatibility
+# Force IPv4 for compatibility
 socket.AF_INET = socket.AF_INET
-ssl._create_default_https_context = ssl._create_unverified_context
 
 # ========================
 # System Configuration
@@ -42,6 +42,22 @@ os.environ.update({
 faiss.omp_set_num_threads(4)
 
 # ========================
+# Environment Setup
+# ========================
+
+# Directory Paths
+BASE_DIR = Path(__file__).resolve().parent.parent
+VECTOR_STORE_PATH = BASE_DIR / "data" / "vector_store"
+UPLOAD_FOLDER = BASE_DIR / "data" / "uploads"
+LOG_DIR = BASE_DIR / "data" / "logs"
+BACKUP_DIR = BASE_DIR / "data" / "backups"
+
+# Ensure log directory exists early for logging
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+load_dotenv(BASE_DIR / ".env")
+
+# ========================
 # Logging Configuration
 # ========================
 
@@ -49,23 +65,11 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('data/logs/app.log', encoding='utf-8'),
+        logging.FileHandler(str(LOG_DIR / 'app.log'), encoding='utf-8'),
         logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger(__name__)
-
-# ========================
-# Environment Setup
-# ========================
-
-load_dotenv()
-
-# Directory Paths
-VECTOR_STORE_PATH = Path("data/vector_store")
-UPLOAD_FOLDER = Path("data/uploads")
-LOG_DIR = Path("data/logs")
-BACKUP_DIR = Path("data/backups")
 
 # ========================
 # Core Functions
@@ -87,10 +91,10 @@ def initialize_directories() -> None:
             directory.mkdir(parents=True, exist_ok=True)
             if os.name != 'nt':
                 os.chmod(directory, 0o755)
-        logger.info("✅ Directories initialized successfully")
+        logger.info("[SUCCESS] Directories initialized successfully")
         verify_faiss_mode()
     except OSError as e:
-        logger.error(f"❌ Directory creation failed: {str(e)}", exc_info=True)
+        logger.error(f"[ERROR] Directory creation failed: {str(e)}", exc_info=True)
         raise RuntimeError(f"Failed to initialize directories: {str(e)}")
 
 initialize_directories()
@@ -99,365 +103,250 @@ initialize_directories()
 # Smart AI Provider with Gemini First, Ollama Fallback
 # ========================
 
-class SmartAIProvider:
-    """Smart AI provider that uses Gemini first, then falls back to Ollama"""
+# ========================
+# Advanced AI Provider (Gemini & Groq Multi-Failover)
+# ========================
+
+class MultiProviderManager:
+    """Manages multi-provider failover for production-level RAG"""
     
     def __init__(self):
+        self.providers = ["gemini", "groq"]
+        self.current_llm_provider = None
+        self.current_embed_provider = None
+        self.quota_exhausted = {"gemini": False, "groq": False}
+        self.errors = []
+
+    def _test_gemini(self, api_key):
+        try:
+            if not api_key: return False
+            genai.configure(api_key=api_key)
+            # Lightweight test: list models instead of generating content to save quota
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    return True
+            return False
+        except Exception as e:
+            if "quota" in str(e).lower() or "429" in str(e):
+                self.quota_exhausted["gemini"] = True
+            self.errors.append(f"Gemini Error: {str(e)}")
+            return False
+
+    def _test_groq(self, api_key):
+        try:
+            if not api_key: return False
+            import requests
+            # DNS resolution on some Windows setups is flaky, try a few times
+            for _ in range(2):
+                try:
+                    url = "https://api.groq.com/openai/v1/chat/completions"
+                    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+                    data = {"model": "llama-3.3-70b-versatile", "messages": [{"role": "user", "content": "test"}], "max_tokens": 1}
+                    response = requests.post(url, headers=headers, json=data, timeout=5)
+                    return response.status_code == 200
+                except Exception:
+                    continue
+            return False
+        except Exception as e:
+            self.errors.append(f"Groq REST Error: {str(e)}")
+            return False
+
+class CustomGroqLLM:
+    """Lightweight Groq wrapper to bypass library version conflicts"""
+    def __init__(self, api_key, model_name="llama-3.3-70b-versatile"):
+        self.api_key = api_key
+        self.model_name = model_name
+        
+    def invoke(self, prompt):
+        import requests
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        # Check if prompt is a string or LangChain Message
+        content = prompt if isinstance(prompt, str) else getattr(prompt, "content", str(prompt))
+        data = {
+            "model": self.model_name,
+            "messages": [{"role": "user", "content": content}],
+            "temperature": 0.1
+        }
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+            if response.status_code == 200:
+                result = response.json()
+                from langchain_core.messages import AIMessage
+                return AIMessage(content=result['choices'][0]['message']['content'])
+            else:
+                return f"Groq API Error: {response.text}"
+        except Exception as e:
+            return f"Groq Connection Error: {str(e)}"
+
+class SmartAIProvider:
+    """Production-grade AI provider prioritizing Gemini with Groq failover"""
+    
+    def __init__(self):
+        self.manager = MultiProviderManager()
         self.embedder = None
         self.llm = None
-        self.embedder_type = "unknown"
-        self.llm_type = "unknown"
-        self.fallback_mode = False
-        self.quota_exceeded = False
+        self.embedder_type = "none"
+        self.llm_type = "none"
         self.initialize_providers()
     
     def initialize_providers(self):
-        """Initialize both embeddings and LLM with Gemini first"""
-        # Initialize embeddings - Gemini first
-        self.embedder, self.embedder_type = self._initialize_embeddings()
+        """Initialize embeddings and LLM using prioritized failover"""
+        gemini_key = os.getenv("GEMINI_API_KEY")
+        groq_key = os.getenv("GROQ_API_KEY")
         
-        # Initialize LLM - Gemini first  
-        self.llm, self.llm_type = self._initialize_llm()
-        
-        logger.info(f"🤖 AI Providers: Embeddings={self.embedder_type}, LLM={self.llm_type}")
-        if self.quota_exceeded:
-            logger.warning("⚠️ Gemini API quota exceeded - using fallback providers")
-    
-    def _initialize_embeddings(self):
-        """Initialize embeddings with Gemini first, then Ollama fallback"""
-        # Try Gemini embeddings first
-        gemini_embeddings = self._try_gemini_embeddings()
-        if gemini_embeddings and not self.quota_exceeded:
-            logger.info("✅ Using Google Gemini for embeddings")
-            return gemini_embeddings, "gemini"
-        
-        # Fallback to Ollama embeddings
-        ollama_embeddings = self._try_ollama_embeddings()
-        if ollama_embeddings:
-            logger.info("🔄 Using Ollama for embeddings (fallback)")
-            self.fallback_mode = True
-            return ollama_embeddings, "ollama"
-        
-        # Final fallback to fake embeddings
-        fake_embeddings = self._create_fake_embeddings()
-        logger.warning("⚠️ Using fake embeddings - no valid embedder available")
-        self.fallback_mode = True
-        return fake_embeddings, "fake"
-    
-    def _initialize_llm(self):
-        """Initialize LLM with Gemini first, then Ollama fallback"""
-        # Try Gemini LLM first
-        gemini_llm = self._try_gemini_llm()
-        if gemini_llm and not self.quota_exceeded:
-            logger.info("✅ Using Google Gemini for text generation")
-            return gemini_llm, "gemini"
-        
-        # Fallback to Ollama LLM
-        ollama_llm = self._try_ollama_llm()
-        if ollama_llm:
-            logger.info("🔄 Using Ollama for text generation (fallback)")
-            self.fallback_mode = True
-            return ollama_llm, "ollama"
-        
-        # Final fallback to fake LLM
-        logger.warning("⚠️ No valid LLM available - text generation will fail")
-        self.fallback_mode = True
-        return None, "none"
-    
-    def _try_gemini_embeddings(self) -> Optional[GoogleGenerativeAIEmbeddings]:
-        """Try to initialize Gemini embeddings with quota check"""
-        try:
-            api_key = os.getenv("GEMINI_API_KEY")
-            if not api_key:
-                logger.warning("GEMINI_API_KEY not found in environment variables")
-                return None
-            
-            # Test API connection with quota check
-            connection_test = self._test_gemini_connection(api_key)
-            if not connection_test["success"]:
-                if connection_test.get("quota_exceeded"):
-                    self.quota_exceeded = True
-                    logger.warning("🚫 Gemini API quota exceeded - will use fallback")
-                return None
-            
-            # Initialize embeddings
-            return GoogleGenerativeAIEmbeddings(
-                model="models/embedding-001",
-                google_api_key=api_key,
-                task_type="retrieval_document",
-                timeout=30,
-                max_retries=2
-            )
-            
-        except Exception as e:
-            logger.warning(f"Gemini embeddings initialization failed: {str(e)}")
-            return None
-    
-    def _try_gemini_llm(self) -> Optional[ChatGoogleGenerativeAI]:
-        """Try to initialize Gemini LLM for text generation"""
-        try:
-            api_key = os.getenv("GEMINI_API_KEY")
-            if not api_key:
-                logger.warning("GEMINI_API_KEY not found for LLM")
-                return None
-            
-            # Skip if quota already exceeded for embeddings
-            if self.quota_exceeded:
-                logger.info("Skipping Gemini LLM - quota exceeded")
-                return None
-            
-            # Test API connection
-            connection_test = self._test_gemini_connection(api_key)
-            if not connection_test["success"]:
-                return None
-            
-            # Initialize LLM
-            return ChatGoogleGenerativeAI(
-                model="gemini-pro",
-                google_api_key=api_key,
-                temperature=0.1,
-                max_output_tokens=2048,
-                timeout=30
-            )
-            
-        except Exception as e:
-            logger.warning(f"Gemini LLM initialization failed: {str(e)}")
-            return None
-    
-    def _try_ollama_embeddings(self) -> Optional['OllamaEmbeddings']:
-        """Try to initialize Ollama embeddings"""
-        try:
-            # Use updated import if available
-            try:
-                from langchain_ollama import OllamaEmbeddings
-            except ImportError:
-                # Fallback to community version
-                from langchain_community.embeddings import OllamaEmbeddings
-            
-            # Test Ollama connection
-            if not self._test_ollama_connection():
-                logger.warning("Ollama connection test failed - is Ollama running?")
-                return None
-            
-            # Try embedding models in order of preference
-            models_to_try = [
-                "mxbai-embed-large",  # Best for embeddings
-                "nomic-embed-text",   # Alternative embedding model
-                "llama3.2",           # General purpose (can do embeddings)
-                "all-minilm"          # Lightweight alternative
-            ]
-            
-            for model_name in models_to_try:
-                try:
-                    logger.info(f"🦙 Trying Ollama embedding model: {model_name}")
-                    embeddings = OllamaEmbeddings(
-                        model=model_name,
-                        base_url="http://localhost:11434"
-                    )
-                    
-                    # Test the embeddings
-                    test_embedding = embeddings.embed_documents(["test document"])
-                    if test_embedding and len(test_embedding[0]) > 0:
-                        logger.info(f"✅ Ollama embeddings loaded: {model_name}")
-                        return embeddings
-                        
-                except Exception as e:
-                    logger.warning(f"Failed to load Ollama embedding model {model_name}: {str(e)}")
-                    continue
-            
-            return None
-            
-        except ImportError:
-            logger.warning("Ollama embeddings not available")
-            return None
-        except Exception as e:
-            logger.warning(f"Ollama embeddings initialization failed: {str(e)}")
-            return None
-    
-    def _try_ollama_llm(self) -> Optional['ChatOllama']:
-        """Try to initialize Ollama LLM for text generation"""
-        try:
-            # Use updated import if available
-            try:
-                from langchain_ollama import ChatOllama
-            except ImportError:
-                # Fallback to community version
-                from langchain_community.chat_models import ChatOllama
-            
-            # Test Ollama connection
-            if not self._test_ollama_connection():
-                logger.warning("Ollama connection test failed for LLM")
-                return None
-            
-            # Try LLM models in order of preference
-            models_to_try = [
-                "llama3.2",           # Latest general purpose
-                "llama3.1",           # Previous version
-                "llama2",             # Stable version
-                "mistral",            # Alternative model
-                "codellama"           # Code-focused (fallback)
-            ]
-            
-            for model_name in models_to_try:
-                try:
-                    logger.info(f"🦙 Trying Ollama LLM model: {model_name}")
-                    llm = ChatOllama(
-                        model=model_name,
-                        base_url="http://localhost:11434",
-                        temperature=0.1,
-                        num_predict=2048
-                    )
-                    
-                    # Test the LLM with a simple query
-                    test_response = llm.invoke("Say 'Hello' in one word.")
-                    if test_response and hasattr(test_response, 'content'):
-                        logger.info(f"✅ Ollama LLM loaded: {model_name}")
-                        return llm
-                        
-                except Exception as e:
-                    logger.warning(f"Failed to load Ollama LLM model {model_name}: {str(e)}")
-                    continue
-            
-            return None
-            
-        except ImportError:
-            logger.warning("Ollama LLM not available")
-            return None
-        except Exception as e:
-            logger.warning(f"Ollama LLM initialization failed: {str(e)}")
-            return None
-    
-    def _test_gemini_connection(self, api_key: str) -> dict:
-        """Test Gemini API connection with comprehensive quota checking"""
-        try:
-            options = {}
-            # Some versions of generativeai don't support timeout in list_models
-            try:
-                models = list(genai.list_models())
-            except TypeError:
-                # Fallback for older versions
-                models = list(genai.list_models())
+        # Check if an existing vector store exists to determine dimension requirements
+        existing_dim = self._get_existing_index_dimension()
 
-            
-            # Test actual embedding to check quota
-            try:
-                test_embeddings = GoogleGenerativeAIEmbeddings(
-                    model="models/embedding-001",
-                    google_api_key=api_key
-                )
-                # Test with minimal text to avoid wasting quota
-                test_result = test_embeddings.embed_documents(["test"])
-                return {
-                    "success": True,
-                    "quota_exceeded": False,
-                    "message": "Gemini API connection successful"
-                }
-            except Exception as embed_error:
-                error_str = str(embed_error).lower()
-                if any(keyword in error_str for keyword in ['quota', 'exceeded', '429', 'billing']):
-                    return {
-                        "success": False,
-                        "quota_exceeded": True,
-                        "message": "Gemini API quota exceeded"
-                    }
-                else:
-                    return {
-                        "success": False,
-                        "quota_exceeded": False,
-                        "message": f"Gemini API test failed: {str(embed_error)}"
-                    }
-                    
-        except Exception as e:
-            error_str = str(e).lower()
-            if any(keyword in error_str for keyword in ['quota', 'exceeded', '429']):
-                return {
-                    "success": False,
-                    "quota_exceeded": True,
-                    "message": "Gemini API quota exceeded"
-                }
-            return {
-                "success": False,
-                "quota_exceeded": False,
-                "message": f"Gemini connection test failed: {str(e)}"
-            }
-    
-    def _test_ollama_connection(self) -> bool:
-        """Test if Ollama is running and accessible"""
-        try:
-            response = requests.get("http://localhost:11434/api/tags", timeout=10)
-            if response.status_code == 200:
-                try:
-                    models_data = response.json()
-                    models = models_data.get('models', [])
-                    model_names = [model.get('name', '') for model in models]
-                    logger.info(f"✅ Ollama running with models: {', '.join(model_names)}")
-                    return True
-                except:
-                    logger.info("✅ Ollama is running")
-                    return True
-            else:
-                logger.warning(f"Ollama returned status code: {response.status_code}")
-                return False
-        except Exception as e:
-            logger.warning(f"Ollama connection test failed: {str(e)}")
-            return False
-    
-    def _create_fake_embeddings(self):
-        """Create fake embeddings as final fallback"""
-        try:
-            from langchain_community.embeddings import FakeEmbeddings
-        except ImportError:
-            from langchain.embeddings import FakeEmbeddings
-        return FakeEmbeddings(size=1024)
-    
-    def get_provider_info(self) -> dict:
-        """Get information about current providers"""
-        return {
-            "embeddings": {
-                "type": self.embedder_type,
-                "status": "active" if self.embedder else "inactive",
-                "quota_exceeded": self.quota_exceeded
-            },
-            "llm": {
-                "type": self.llm_type,
-                "status": "active" if self.llm else "inactive"
-            },
-            "fallback_mode": self.fallback_mode,
-            "quota_exceeded": self.quota_exceeded,
-            "recommendation": self._get_recommendation()
-        }
-    
-    def _get_recommendation(self) -> str:
-        """Get recommendation for setup"""
-        if self.quota_exceeded:
-            return "🚫 Gemini API quota exceeded - Using fallback providers. Check billing or wait for quota reset."
-        elif self.embedder_type == "gemini" and self.llm_type == "gemini":
-            return "✅ Optimal setup - Using Gemini for both embeddings and text generation"
-        elif self.embedder_type == "ollama" and self.llm_type == "ollama":
-            return "🔄 Using Ollama for both - Consider adding Gemini API key for better performance"
-        elif self.fallback_mode:
-            return "⚠️ Fallback mode active - Check your API keys and Ollama setup"
+        # 1. Initialize Embeddings (Advanced RAG: 3072-dim)
+        # We use text-embedding-004 for superior legal document semantic mapping
+        target_dim = 3072
+        if existing_dim and existing_dim in [768, 1536]:
+             # If index exists with different size, we must stay consistent OR re-index
+             target_dim = existing_dim
+             logger.warning(f"Existing index dimension {existing_dim} detected. Staying with {existing_dim} to prevent corruption.")
+
+        if self.manager._test_gemini(gemini_key):
+            self.embedder = GoogleGenerativeAIEmbeddings(
+                model="models/text-embedding-004",
+                google_api_key=gemini_key,
+                task_type="retrieval_document",
+                output_dimensionality=target_dim
+            )
+            self.embedder_type = "gemini"
+            logger.info(f"[SUCCESS] Embeddings: text-embedding-004 (Active) - Dim: {target_dim}")
         else:
-            return "❌ Setup issues - Configure Gemini API or Ollama"
-    
-    def force_fallback_to_ollama(self):
-        """Force the system to use Ollama providers (useful when quota is exceeded)"""
-        logger.info("🔄 Manually forcing fallback to Ollama providers")
-        self.quota_exceeded = True
-        self.fallback_mode = True
+            # Emergency local fallback ONLY if no existing 768-dim index is found
+            # Note: MiniLM is 384. If the database exists and is 768, we MUST NOT 
+            # switch models within the same index or we corrupt the search space.
+            if existing_dim and existing_dim != 384 and existing_dim != 768:
+                logger.error(f"[CRITICAL] Embedding failover BLOCKED: Existing vector store expects {existing_dim} dimensions, but Local Fallback generates 384. Using FakeEmbeddings to prevent crash.")
+                from langchain_community.embeddings import FakeEmbeddings
+                self.embedder = FakeEmbeddings(size=existing_dim)
+                self.embedder_type = "emergency-fake"
+            else:
+                try:
+                    from langchain_community.embeddings import HuggingFaceEmbeddings
+                    self.embedder = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+                    self.embedder_type = "local-huggingface"
+                    logger.warning("[FAILOVER] Embeddings: Local HuggingFace Active (384-dim index only)")
+                except Exception as e:
+                    logger.error(f"[ERROR] Local HuggingFace initialization failed: {e}")
+                    self.embedder = None
+                    self.embedder_type = "error"
+
+        # 2. Initialize LLM with Gemini -> Groq failover
+        if not self.manager.quota_exhausted["gemini"] and self.manager._test_gemini(gemini_key):
+            self.llm = ChatGoogleGenerativeAI(
+                model="gemini-flash-latest",
+                google_api_key=gemini_key,
+                temperature=0.1,
+                max_output_tokens=2048
+            )
+            self.llm_type = "gemini"
+            logger.info("[SUCCESS] LLM: Gemini Flash (Primary)")
+        elif self.manager._test_groq(groq_key):
+            self.llm = CustomGroqLLM(
+                api_key=groq_key,
+                model_name="llama-3.3-70b-versatile"
+            )
+            self.llm_type = "groq-custom-llama3-3"
+            logger.info("[SUCCESS] LLM: Groq Llama3.3-70b (Custom REST Active)")
+        else:
+            logger.error("[CRITICAL] No LLM providers available (Gemini/Groq failed)")
+            self.llm = None
+
+    async def stream_chat(self, query: str, context: str):
+        """Streaming chat completion for real-time response"""
+        if not self.llm or self.llm_type != "gemini":
+            # Fallback to non-streaming for now if not gemini
+            from langchain_core.messages import HumanMessage
+            logger.info("Streaming fallback to standard invoke")
+            res = self.llm.invoke(query)
+            yield getattr(res, "content", str(res))
+            return
+
+        try:
+            # Direct Gemini streaming for lower latency
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            config_llm: ChatGoogleGenerativeAI = self.llm
+            async for chunk in config_llm.astream(query):
+                yield chunk.content
+        except Exception as e:
+            logger.error(f"Streaming error: {e}")
+            yield f"Error during streaming: {str(e)}"
+
+    def rerank(self, query: str, documents: List[Any], top_n: int = 4) -> List[Any]:
+        """Semantic reranking using Cross-Encoders (Fallback to score-based if model not loaded)"""
+        try:
+            # Professional systems use a second-stage reranker
+            # For now, we use a sophisticated metadata-aware scoring if Cross-Encoder isn't ready
+            return sorted(documents, key=lambda d: self._calculate_relevance(query, d), reverse=True)[:top_n]
+        except Exception as e:
+            logger.error(f"Reranking failed: {e}")
+            return documents[:top_n]
+            
+    def _calculate_relevance(self, query: str, doc: Any) -> float:
+        """Internal scoring for document-query relevance"""
+        score = 0
+        content_lower = doc.page_content.lower()
+        query_words = set(re.findall(r'\w+', query.lower()))
         
-        # Reinitialize with Ollama
-        ollama_embeddings = self._try_ollama_embeddings()
-        if ollama_embeddings:
-            self.embedder = ollama_embeddings
-            self.embedder_type = "ollama"
-            logger.info("✅ Switched to Ollama embeddings")
+        # Boost for exact citation matches
+        citations = re.findall(r'\b(?:PLD|SCMR|CLC|PCrLJ|YLR|PLC|PTD|CLD)\s+\d{4}\b', query, re.IGNORECASE)
+        for cite in citations:
+            if cite.lower() in content_lower: score += 50
+            
+        # Standard keyword overlap
+        for word in query_words:
+            if len(word) > 3 and word in content_lower: score += 2
+            
+        return score
+
+    def generate_doc_summary(self, text: str) -> str:
+        """Professional 2-sentence summary generation for Contextual Retrieval"""
+        if not self.llm: return "General legal document."
         
-        ollama_llm = self._try_ollama_llm()
-        if ollama_llm:
-            self.llm = ollama_llm
-            self.llm_type = "ollama"
-            logger.info("✅ Switched to Ollama LLM")
+        try:
+            # We take the first 4000 chars as a proxy for doc summary
+            sample_text = text[:4000]
+            prompt = f"""
+            Identify the core legal issue, parties involved, and jurisdiction in 2 concise sentences.
+            
+            TEXT: {sample_text}
+            
+            CONCISE SUMMARY:"""
+            
+            response = self.llm.invoke(prompt)
+            summary = response.content if hasattr(response, 'content') else str(response)
+            return summary.strip()
+        except Exception as e:
+            logger.error(f"Doc summary failed: {e}")
+            return "Legal document regarding Pakistani law."
+
+    def _get_existing_index_dimension(self) -> Optional[int]:
+        """Check the dimension of the existing FAISS index if it exists"""
+        try:
+            index_path = VECTOR_STORE_PATH / "index.faiss"
+            if index_path.exists():
+                index = faiss.read_index(str(index_path))
+                return index.d
+        except Exception:
+            pass
+        return None
+
+    def get_provider_info(self) -> dict:
+        return {
+            "embeddings": {"type": self.embedder_type, "status": "active" if self.embedder else "error"},
+            "llm": {"type": self.llm_type, "status": "active" if self.llm else "error"},
+            "failover_details": self.manager.quota_exhausted,
+            "errors": self.manager.errors[-3:] if self.manager.errors else []
+        }
+
+    def _get_recommendation(self) -> str:
+        if self.llm_type == "gemini": return "✅ High Precision Mode (Gemini)"
+        if self.llm_type == "groq-llama3-70b": return "⚡ High Speed Mode (Groq Failover)"
+        return "⚠️ All external AI providers are offline"
 
 # Initialize smart AI provider
 ai_provider = SmartAIProvider()
@@ -511,14 +400,14 @@ def load_vector_store() -> FAISS:
         if len(store.index_to_docstore_id) == 0:
             logger.warning("Loaded vector store is empty")
         
-        logger.info(f"✅ Vector store loaded successfully with {len(store.index_to_docstore_id)} documents")
+        logger.info(f"Vector store loaded successfully with {len(store.index_to_docstore_id)} documents")
         return store
         
     except Exception as e:
-        logger.error(f"❌ Failed to load vector store: {str(e)}", exc_info=True)
+        logger.error(f"Failed to load vector store: {str(e)}", exc_info=True)
         
         # Create emergency fallback store
-        logger.info("🆕 Creating emergency fallback vector store")
+        logger.info("Creating emergency fallback vector store")
         return _create_emergency_fallback_store()
 
 def _create_new_vector_store() -> FAISS:
@@ -530,10 +419,10 @@ def _create_new_vector_store() -> FAISS:
         )
         # Save immediately
         save_vector_store(store)
-        logger.info("✅ New vector store created successfully")
+        logger.info("New vector store created successfully")
         return store
     except Exception as e:
-        logger.error(f"❌ Failed to create new vector store: {str(e)}")
+        logger.error(f"Failed to create new vector store: {str(e)}")
         return _create_emergency_fallback_store()
 
 def _create_emergency_fallback_store() -> FAISS:
@@ -545,15 +434,15 @@ def _create_emergency_fallback_store() -> FAISS:
         except ImportError:
             from langchain.embeddings import FakeEmbeddings
             
-        emergency_embeddings = FakeEmbeddings(size=1024)
+        emergency_embeddings = FakeEmbeddings(size=768)
         store = FAISS.from_texts(
             ["Emergency fallback mode. Please check system configuration."], 
             emergency_embeddings
         )
-        logger.warning("⚠️ Emergency fallback vector store created")
+        logger.warning("Emergency fallback vector store created")
         return store
     except Exception as e:
-        logger.critical(f"💥 CRITICAL: Cannot create any vector store: {str(e)}")
+        logger.critical(f"CRITICAL: Cannot create any vector store: {str(e)}")
         raise RuntimeError(f"Unable to initialize vector store: {str(e)}")
 
 def save_vector_store(store: FAISS) -> Tuple[bool, str]:
@@ -731,12 +620,6 @@ def get_system_status() -> dict:
             }
         }
 
-def force_ollama_fallback():
-    """Force the system to use Ollama providers (useful for testing or quota issues)"""
-    ai_provider.force_fallback_to_ollama()
-    logger.info("✅ System forced to use Ollama providers")
-    return {"success": True, "message": "Switched to Ollama providers"}
-
 # ========================
 # Setup Instructions
 # ========================
@@ -746,29 +629,20 @@ def setup_instructions() -> str:
     return """
 🚀 **AI Provider Setup Instructions:**
 
-**1. Gemini API (Recommended - First Priority):**
+**1. Gemini API (Primary):**
    - Get API key: https://aistudio.google.com/app/apikey
    - Add to .env: GEMINI_API_KEY=your_api_key_here
-   - Benefits: Best performance, reliable, fast
-   - Note: Free tier has limited quota
+   - Benefits: Best precision, industry standard embeddings
 
-**2. Ollama (Fallback - Second Priority):**
-   - Install: https://ollama.ai/
-   - Start: `ollama serve`
-   - Pull models:
-     - For embeddings: `ollama pull mxbai-embed-large`
-     - For text: `ollama pull llama3.2`
-   - Install Python package: `pip install langchain-ollama`
-
-**3. Quota Issues:**
-   - If Gemini quota is exceeded, system auto-falls back to Ollama
-   - To manually force Ollama: Call `force_ollama_fallback()`
-   - Gemini quotas reset daily
+**2. Groq API (Failover):**
+   - Get API key: https://console.groq.com/keys
+   - Add to .env: GROQ_API_KEY=your_api_key_here
+   - Benefits: Extreme speed, high-performance Llama3-70b failover
 
 **Priority Order:**
-1. ✅ Gemini API for both embeddings and text
-2. 🔄 Ollama if Gemini unavailable or quota exceeded
-3. ⚠️ Fake embeddings as last resort
+1. ✅ Gemini API for both embeddings and LLM
+2. ⚡ Groq Llama3-70b if Gemini is down or quota exceeded
+3. ⚠️ Local Embeddings if Gemini Embedding API fails
     """
 
 # ========================
@@ -786,7 +660,6 @@ __all__ = [
     'validate_vector_store',
     'get_file_hash',
     'get_system_status',
-    'force_ollama_fallback',  # New function
     'SmartAIProvider',
     'setup_instructions'
 ]
@@ -805,14 +678,14 @@ if __name__ == "__main__":
     # Test vector store
     try:
         store = load_vector_store()
-        logger.info(f"Vector Store: {len(store.index_to_docstore_id)} documents")
+        logger.info(f"Vector Store Status: {len(store.index_to_docstore_id)} documents loaded")
         logger.info("✅ Config initialization completed successfully")
         
-        # Show setup instructions if in fallback mode
+        # Show setup instructions/status
         provider_info = ai_provider.get_provider_info()
-        if provider_info['fallback_mode'] or provider_info['quota_exceeded']:
-            logger.info("💡 Current Status:")
-            logger.info(setup_instructions())
+        logger.info(f"Provider recommendation: {ai_provider._get_recommendation()}")
+        if provider_info['llm']['status'] == 'error':
+            logger.warning(setup_instructions())
             
     except Exception as e:
         logger.error(f"❌ Config initialization failed: {e}")

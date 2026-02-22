@@ -111,7 +111,7 @@ const priorities = ['Low', 'Medium', 'High', 'Critical'];
 
 const Support = () => {
     const theme = useTheme();
-    const [form, setForm] = useState({ name: '', email: '', type: '', priority: 'Medium', subject: '', message: '' });
+    const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -259,18 +259,6 @@ const Support = () => {
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
                                             <TextField fullWidth required label="Email Address" name="email" type="email" value={form.email} onChange={handleChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField fullWidth select required label="Issue Type" name="type" value={form.type} onChange={handleChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}>
-                                                {issueTypes.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
-                                            </TextField>
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <TextField fullWidth select label="Priority" name="priority" value={form.priority} onChange={handleChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}>
-                                                {priorities.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
-                                            </TextField>
                                         </Grid>
                                     </Grid>
                                     <TextField fullWidth required label="Subject" name="subject" value={form.subject} onChange={handleChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />

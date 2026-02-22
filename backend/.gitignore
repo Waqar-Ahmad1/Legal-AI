@@ -1,0 +1,17 @@
+# Backend
+.env
+*.log
+__pycache__/
+*.pyc
+data/logs/
+data/backups/
+data/uploads/
+data/vector_store/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store

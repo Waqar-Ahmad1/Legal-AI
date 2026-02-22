@@ -15,6 +15,12 @@ import {
     Divider,
     IconButton,
     InputAdornment,
+    alpha,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from '@mui/material';
 import {
     Settings as SettingsIcon,
@@ -37,6 +43,9 @@ const Settings = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [showSmtpPass, setShowSmtpPass] = useState(false);
+    const [securityOp, setSecurityOp] = useState(null); // 'rotate' or 'revoke'
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [executing, setExecuting] = useState(false);
 
     const [settings, setSettings] = useState({
         site_name: 'Legal AI',
@@ -91,6 +100,40 @@ const Settings = () => {
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleSecurityAction = async () => {
+        setExecuting(true);
+        setError(null);
+        try {
+            let response;
+            if (securityOp === 'rotate') {
+                response = await adminAPI.rotateSecretKey();
+            } else {
+                response = await adminAPI.revokeAllSessions();
+            }
+
+            if (response.success) {
+                setSuccess(response.message);
+                setConfirmOpen(false);
+                // If we revoked all sessions, we might get logged out on next request
+                if (securityOp === 'revoke') {
+                    setTimeout(() => window.location.href = '/admin/signin', 2000);
+                }
+            } else {
+                setError(response.message);
+            }
+        } catch (err) {
+            setError(`Security operation failed: ${err.message}`);
+        } finally {
+            setExecuting(false);
+            setSecurityOp(null);
+        }
+    };
+
+    const openConfirm = (op) => {
+        setSecurityOp(op);
+        setConfirmOpen(true);
     };
 
     const handleChange = (e) => {
@@ -165,230 +208,306 @@ const Settings = () => {
                     onChange={(e, v) => setActiveTab(v)}
                     sx={{
                         borderBottom: '1px solid rgba(255,255,255,0.1)',
-                        '& .MuiTab-root': { color: '#94a3b8', fontWeight: 600 },
+                        '& .MuiTab-root': {
+                            color: '#94a3b8',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            textTransform: 'none',
+                            minHeight: 64
+                        },
                         '& .Mui-selected': { color: '#3b82f6' }
                     }}
                 >
-                    <Tab icon={<SettingsIcon sx={{ mr: 1 }} />} label="General" iconPosition="start" />
-                    <Tab icon={<AIIcon sx={{ mr: 1 }} />} label="AI Engine" iconPosition="start" />
-                    <Tab icon={<SecurityIcon sx={{ mr: 1 }} />} label="Security" iconPosition="start" />
-                    <Tab icon={<EmailIcon sx={{ mr: 1 }} />} label="Mail Server" iconPosition="start" />
+                    <Tab icon={<SettingsIcon sx={{ fontSize: 20 }} />} label="General Config" iconPosition="start" />
+                    <Tab icon={<AIIcon sx={{ fontSize: 20 }} />} label="AI Engine & RAG" iconPosition="start" />
+                    <Tab icon={<SecurityIcon sx={{ fontSize: 20 }} />} label="System Security" iconPosition="start" />
+                    <Tab icon={<EmailIcon sx={{ fontSize: 20 }} />} label="SMTP Settings" iconPosition="start" />
                 </Tabs>
 
                 <TabPanel value={activeTab} index={0}>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Site Name"
-                                name="site_name"
-                                value={settings.site_name}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Support Contact Email"
-                                name="contact_email"
-                                value={settings.contact_email}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        color="primary"
-                                        name="maintenance_mode"
-                                        checked={settings.maintenance_mode}
-                                        onChange={handleChange}
+                    <Box sx={{ mt: 1 }}>
+                        <Typography variant="subtitle2" sx={{ color: '#3b82f6', mb: 3, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                            Core Application Identity
+                        </Typography>
+                        <Grid container spacing={4}>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>SITE DISPLAY NAME</Typography>
+                                <TextField
+                                    fullWidth
+                                    name="site_name"
+                                    value={settings.site_name}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)',
+                                            '&:hover': { border: '1px solid rgba(59, 130, 246, 0.4)' }
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>SYSTEM SUPPORT EMAIL</Typography>
+                                <TextField
+                                    fullWidth
+                                    name="contact_email"
+                                    value={settings.contact_email}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)',
+                                            '&:hover': { border: '1px solid rgba(59, 130, 246, 0.4)' }
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Box sx={{ p: 3, borderRadius: 4, bgcolor: alpha('#f59e0b', 0.05), border: `1px solid ${alpha('#f59e0b', 0.1)}` }}>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                color="warning"
+                                                name="maintenance_mode"
+                                                checked={settings.maintenance_mode}
+                                                onChange={handleChange}
+                                            />
+                                        }
+                                        label={
+                                            <Box sx={{ ml: 1 }}>
+                                                <Typography sx={{ color: '#f59e0b', fontWeight: 800 }}>Maintenance Mode Activation</Typography>
+                                                <Typography variant="body2" sx={{ color: '#94a3b8', maxWidth: 600 }}>
+                                                    Redirect all non-admin traffic to a maintenance page. Use this for critical database migrations or system upgrades.
+                                                </Typography>
+                                            </Box>
+                                        }
                                     />
-                                }
-                                label={
-                                    <Box>
-                                        <Typography sx={{ color: 'white', fontWeight: 600 }}>Maintenance Mode</Typography>
-                                        <Typography sx={{ color: '#94a3b8', variant: 'body2' }}>
-                                            When active, users will see a maintenance page while admins can still use the system.
-                                        </Typography>
-                                    </Box>
-                                }
-                            />
+                                </Box>
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    </Box>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={1}>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Primary LLM Model"
-                                name="model_name"
-                                value={settings.model_name}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                                placeholder="e.g. gpt-4, claude-3"
-                            />
+                    <Box sx={{ mt: 1 }}>
+                        <Typography variant="subtitle2" sx={{ color: '#3b82f6', mb: 3, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                            Natural Language Processing Configuration
+                        </Typography>
+                        <Grid container spacing={4}>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>ACTIVE LLM ENGINE</Typography>
+                                <TextField
+                                    fullWidth
+                                    name="model_name"
+                                    value={settings.model_name}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>VECTOR SEARCH DENSITY (TOP-K)</Typography>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    name="top_k"
+                                    value={settings.top_k}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>DOCUMENT CHUNK SIZE</Typography>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    name="chunk_size"
+                                    value={settings.chunk_size}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>CONTEXTUAL OVERLAP</Typography>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    name="chunk_overlap"
+                                    value={settings.chunk_overlap}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Top-K Results"
-                                name="top_k"
-                                type="number"
-                                value={settings.top_k}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Chunk Size (Characters)"
-                                name="chunk_size"
-                                type="number"
-                                value={settings.chunk_size}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Chunk Overlap"
-                                name="chunk_overlap"
-                                type="number"
-                                value={settings.chunk_overlap}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                            />
-                        </Grid>
-                    </Grid>
+                    </Box>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={2}>
-                    <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>Admin Account Security</Typography>
-                    <Typography variant="body2" sx={{ color: '#94a3b8', mb: 3 }}>
-                        Logged in as: <strong>{admin?.email}</strong>
-                    </Typography>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <Button
-                                variant="outlined"
-                                color="warning"
-                                sx={{ borderRadius: '12px' }}
-                            >
-                                Change Password
-                            </Button>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
-                            <Typography variant="h6" sx={{ color: 'white', mb: 1 }}>API Key Rotation</Typography>
-                            <Typography variant="body2" sx={{ color: '#94a3b8', mb: 2 }}>
-                                Rotate secrets for internal services (Database, JWT, etc)
-                            </Typography>
-                            <Button
-                                variant="text"
-                                sx={{ color: '#3b82f6' }}
-                                disabled
-                            >
-                                Key management disabled for this session
-                            </Button>
-                        </Grid>
-                    </Grid>
+                    <Box sx={{ mt: 1 }}>
+                        <Typography variant="subtitle2" sx={{ color: '#3b82f6', mb: 3, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                            Encryption & Access Control
+                        </Typography>
+                        <Box sx={{ p: 4, borderRadius: 4, bgcolor: alpha('#3b82f6', 0.03), border: `1px solid ${alpha('#3b82f6', 0.08)}` }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                                <Box sx={{ p: 1.5, borderRadius: 3, bgcolor: alpha('#3b82f6', 0.1), color: '#3b82f6', mr: 2 }}>
+                                    <SecurityIcon />
+                                </Box>
+                                <Box>
+                                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'white' }}>Session Encryption</Typography>
+                                    <Typography variant="body2" sx={{ color: '#94a3b8' }}>Manage JWT secrets and session persistence.</Typography>
+                                </Box>
+                            </Box>
+                            <Divider sx={{ mb: 4, borderColor: alpha('#94a3b8', 0.1) }} />
+                            <Grid container spacing={4}>
+                                <Grid item xs={12} md={6}>
+                                    <Button
+                                        fullWidth
+                                        variant="outlined"
+                                        color="primary"
+                                        onClick={() => openConfirm('rotate')}
+                                        sx={{ py: 2, borderRadius: 3, textTransform: 'none', fontWeight: 700 }}
+                                    >
+                                        Rotate Master Secret Key
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <Button
+                                        fullWidth
+                                        variant="outlined"
+                                        color="error"
+                                        onClick={() => openConfirm('revoke')}
+                                        sx={{ py: 2, borderRadius: 3, textTransform: 'none', fontWeight: 700 }}
+                                    >
+                                        Revoke All Admin Sessions
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </Box>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={3}>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={8}>
-                            <TextField
-                                fullWidth
-                                label="SMTP Host"
-                                name="smtp_host"
-                                value={settings.smtp_host}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                            />
+                    <Box sx={{ mt: 1 }}>
+                        <Typography variant="subtitle2" sx={{ color: '#3b82f6', mb: 3, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                            Outgoing Communication Server
+                        </Typography>
+                        <Grid container spacing={4}>
+                            <Grid item xs={12} md={8}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>SMTP RELAY HOST</Typography>
+                                <TextField
+                                    fullWidth
+                                    name="smtp_host"
+                                    value={settings.smtp_host}
+                                    onChange={handleChange}
+                                    placeholder="smtp.gmail.com"
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>PORT</Typography>
+                                <TextField
+                                    fullWidth
+                                    type="number"
+                                    name="smtp_port"
+                                    value={settings.smtp_port}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>SYSTEM AUTH USER</Typography>
+                                <TextField
+                                    fullWidth
+                                    name="smtp_user"
+                                    value={settings.smtp_user}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="caption" sx={{ color: '#94a3b8', mb: 1, display: 'block', fontWeight: 600 }}>AUTHENTICATION PASSWORD</Typography>
+                                <TextField
+                                    fullWidth
+                                    name="smtp_pass"
+                                    type={showSmtpPass ? 'text' : 'password'}
+                                    value={settings.smtp_pass}
+                                    onChange={handleChange}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            bgcolor: 'rgba(255,255,255,0.03)',
+                                            borderRadius: 3,
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }
+                                    }}
+                                    inputProps={{ style: { color: 'white', fontWeight: 500 } }}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    onClick={() => setShowSmtpPass(!showSmtpPass)}
+                                                    sx={{ color: '#94a3b8' }}
+                                                >
+                                                    {showSmtpPass ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} md={4}>
-                            <TextField
-                                fullWidth
-                                label="Port"
-                                name="smtp_port"
-                                type="number"
-                                value={settings.smtp_port}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Username"
-                                name="smtp_user"
-                                value={settings.smtp_user}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Password"
-                                name="smtp_pass"
-                                type={showSmtpPass ? 'text' : 'password'}
-                                value={settings.smtp_pass}
-                                onChange={handleChange}
-                                variant="filled"
-                                sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}
-                                InputLabelProps={{ style: { color: '#94a3b8' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => setShowSmtpPass(!showSmtpPass)}
-                                                sx={{ color: '#94a3b8' }}
-                                            >
-                                                {showSmtpPass ? <VisibilityOff /> : <Visibility />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                    </Grid>
+                    </Box>
                 </TabPanel>
             </Box>
         </Box>

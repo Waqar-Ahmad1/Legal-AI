@@ -102,16 +102,16 @@ const Sidebar = styled(Box, { shouldForwardProp: (prop) => prop !== 'isOpen' })(
 
 const SidebarToggle = styled(IconButton)(({ theme, isOpen }) => ({
   position: 'absolute',
-  left: isOpen ? 320 : 0,
-  top: '50%',
-  transform: 'translateY(-50%)',
+  top: '24px',
+  transform: 'none',
   zIndex: 1000,
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   backgroundColor: alpha('#3b82f6', 0.9),
   color: 'white',
-  width: 24,
-  height: 48,
-  borderRadius: '0 6px 6px 0',
+  width: 32,
+  height: 32,
+  borderRadius: '50%',
+  marginLeft: isOpen ? -16 : 8,
   '&:hover': {
     backgroundColor: '#3b82f6',
     width: 28,
@@ -395,6 +395,7 @@ const TryItNow = () => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [error, setError] = useState(null);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState(null);
 
   const chatEndRef = useRef(null);
 
@@ -433,8 +434,9 @@ const TryItNow = () => {
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
+    const userInput = input.trim();
     const userMessage = {
-      text: input,
+      text: userInput,
       sender: 'user',
       timestamp: new Date(),
       id: Date.now()
@@ -445,41 +447,90 @@ const TryItNow = () => {
     setError(null);
     setIsLoading(true);
 
-    try {
-      const response = await chatAPI.sendMessage(input);
-      if (response.success && response.data) {
-        const aiResponse = {
-          text: response.data.answer,
-          sender: 'ai',
-          timestamp: new Date(),
-          id: Date.now() + 1,
-          sources: response.data.sources || [],
-          providerInfo: response.data.provider_info
-        };
+    let aiMessage = {
+      text: '',
+      sender: 'ai',
+      timestamp: new Date(),
+      id: Date.now() + 1,
+      sources: [],
+      isStreaming: true
+    };
 
-        setMessages(prev => {
-          const updated = [...prev, aiResponse];
-          if (user?.id) {
-            saveConversation(user.id, { messages: updated, timestamp: new Date() })
-              .then(fetchConversations);
-          }
-          return updated;
-        });
-      } else {
-        throw new Error(response.message || 'AI failed to respond');
-      }
+    setMessages(prev => [...prev, aiMessage]);
+
+    try {
+      let accumulatedText = '';
+
+      await chatAPI.streamMessage(
+        userInput,
+        (metadata) => {
+          // Handle Metadata (Sources, Provider Info)
+          setMessages(prev => {
+            const updated = [...prev];
+            const idx = updated.findIndex(m => m.id === aiMessage.id);
+            if (idx > -1) {
+              updated[idx].sources = metadata.sources || [];
+              updated[idx].providerInfo = metadata.provider_info;
+            }
+            return updated;
+          });
+        },
+        (chunk) => {
+          // Handle Content Chunk
+          accumulatedText += chunk;
+          setMessages(prev => {
+            const updated = [...prev];
+            const idx = updated.findIndex(m => m.id === aiMessage.id);
+            if (idx > -1) {
+              updated[idx].text = accumulatedText;
+            }
+            return updated;
+          });
+        },
+        () => {
+          // Stream Done
+          setIsLoading(false);
+          setMessages(prev => {
+            const updated = [...prev];
+            const idx = updated.findIndex(m => m.id === aiMessage.id);
+            if (idx > -1) {
+              updated[idx].isStreaming = false;
+
+              // Persist to Backend after full stream
+              if (user) {
+                saveConversation(user.id, {
+                  id: currentConversationId,
+                  title: updated[0].text.substring(0, 30) + '...',
+                  messages: updated
+                }).then(res => {
+                  if (res.success && res.data?._id && !currentConversationId) {
+                    setCurrentConversationId(res.data._id);
+                  }
+                  fetchConversations();
+                });
+              }
+            }
+            return updated;
+          });
+        }
+      );
     } catch (err) {
+      console.error('Streaming error UI update:', err);
       const msg = extractErrorMessage(err);
       setError(msg);
-      setMessages(prev => [...prev, {
-        text: `Error: ${msg}`,
-        sender: 'ai',
-        timestamp: new Date(),
-        id: Date.now() + 1,
-        isError: true
-      }]);
-    } finally {
       setIsLoading(false);
+      setMessages(prev => {
+        const updated = [...prev];
+        const idx = updated.findIndex(m => m.id === aiMessage.id);
+        if (idx > -1) {
+          if (updated[idx].text === '') {
+            updated[idx].text = `Error: ${msg}`;
+            updated[idx].isError = true;
+          }
+          updated[idx].isStreaming = false;
+        }
+        return updated;
+      });
     }
   };
 
@@ -559,13 +610,28 @@ const TryItNow = () => {
             <Typography variant="h6" sx={{ fontWeight: 800, color: 'white', letterSpacing: -0.5 }}>History</Typography>
           </Box>
 
-          <Box sx={{ px: 2, mb: 2 }}>
+          <Box sx={{ px: 2, mb: 4 }}>
             <Button
               fullWidth
               variant="contained"
               startIcon={<Add />}
               onClick={() => setMessages([])}
-              sx={{ borderRadius: 2, bgcolor: alpha('#3b82f6', 0.1), color: '#60a5fa', border: `1px solid ${alpha('#3b82f6', 0.2)}`, boxShadow: 'none', '&:hover': { bgcolor: alpha('#3b82f6', 0.2), borderColor: '#3b82f6' } }}
+              sx={{
+                borderRadius: '16px',
+                height: '56px',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '1rem',
+                textTransform: 'none',
+                boxShadow: '0 8px 16px rgba(59, 130, 246, 0.25)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 12px 20px rgba(59, 130, 246, 0.35)',
+                },
+                transition: 'all 0.2s ease',
+              }}
             >
               New Case
             </Button>
@@ -583,27 +649,30 @@ const TryItNow = () => {
               {conversations.length > 0 ? (
                 conversations.map((conv) => (
                   <ListItem
-                    key={conv.id}
+                    key={conv._id || conv.id}
                     button
-                    onClick={() => setMessages(conv.messages || [])}
+                    onClick={() => {
+                      setMessages(conv.messages || []);
+                      setCurrentConversationId(conv._id || conv.id);
+                    }}
                     sx={{
                       borderRadius: 2,
                       mb: 0.5,
                       transition: 'all 0.2s ease',
                       '&:hover': { bgcolor: alpha('#94a3b8', 0.1) },
-                      bgcolor: messages.length > 0 && conv.messages && JSON.stringify(conv.messages) === JSON.stringify(messages) ? alpha('#3b82f6', 0.1) : 'transparent',
+                      bgcolor: currentConversationId === (conv._id || conv.id) ? alpha('#3b82f6', 0.1) : 'transparent',
                     }}
                   >
                     <ListItemIcon sx={{ minWidth: 40, color: '#94a3b8' }}>
                       <ChatBubbleOutline fontSize="small" />
                     </ListItemIcon>
                     <ListItemText
-                      primary={conv.messages?.[0]?.text || 'Untitled Session'}
-                      secondary={new Date(conv.timestamp).toLocaleDateString()}
+                      primary={conv.title || conv.messages?.[0]?.text || 'Untitled Session'}
+                      secondary={new Date(conv.updated_at || conv.timestamp).toLocaleDateString()}
                       primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', color: '#f8fafc', fontWeight: 500 }}
                       secondaryTypographyProps={{ fontSize: '0.75rem', color: '#94a3b8' }}
                     />
-                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id); }} sx={{ opacity: 0.2, '&:hover': { opacity: 1, color: '#ef4444' } }}>
+                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv._id || conv.id); }} sx={{ opacity: 0.2, '&:hover': { opacity: 1, color: '#ef4444' } }}>
                       <Delete fontSize="inherit" />
                     </IconButton>
                   </ListItem>
@@ -632,7 +701,13 @@ const TryItNow = () => {
               <Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'white', lineHeight: 1.2 }}>LegalAI Pro</Typography>
                 <Typography variant="caption" sx={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#10b981' }} /> Semantic Engine Online
+                  <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#10b981' }} />
+                  Semantic Engine Online
+                  {messages.some(m => m.providerInfo) && (
+                    <span style={{ color: '#94a3b8', marginLeft: 4 }}>
+                      • Powered by {messages.findLast(m => m.providerInfo)?.providerInfo?.llm?.type?.split('-')[0] || 'Gemini'}
+                    </span>
+                  )}
                 </Typography>
               </Box>
             </Box>
@@ -731,11 +806,14 @@ const TryItNow = () => {
                     <Typography variant="body2">{msg.text}</Typography>
                     {msg.sources?.length > 0 && (
                       <Box sx={{ mt: 1.5, display: 'flex', flexWrap: 'wrap', borderTop: `1px solid ${alpha('#fff', 0.1)}`, pt: 1 }}>
-                        {msg.sources.map((s, i) => (
-                          <Tooltip key={i} title={s.content_preview || s.source}>
-                            <SourceTag label={s.title || s.source} size="small" />
-                          </Tooltip>
-                        ))}
+                        {Array.from(new Set(msg.sources.map(s => s.title || s.source))).map((sourceTitle, i) => {
+                          const originalSource = msg.sources.find(s => (s.title || s.source) === sourceTitle);
+                          return (
+                            <Tooltip key={i} title={originalSource?.content_preview || sourceTitle}>
+                              <SourceTag label={sourceTitle} size="small" />
+                            </Tooltip>
+                          );
+                        })}
                       </Box>
                     )}
                     <Typography variant="caption" sx={{ display: 'block', mt: 1, opacity: 0.5, fontSize: '0.65rem' }}>
